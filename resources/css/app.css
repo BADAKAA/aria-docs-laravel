@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './markdown.css';
+@import './syntax.css';
 
 @import "tw-animate-css";
 
@@ -25,6 +26,8 @@ body {
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);
+
+    --color-headings: var(--headings);
 
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
@@ -69,7 +72,7 @@ body {
 
 :root {
     --background: oklch(1 0 0);
-    --foreground: oklch(0.2 0 0);
+    --foreground: oklch(0.37 0.01 285.89);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
@@ -101,6 +104,8 @@ body {
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+
+    --headings: oklch(0.21 0.01 0);
 }
 
 .dark {
@@ -136,6 +141,8 @@ body {
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+
+    --headings: oklch(0.77 0.02 0);
 }
 
 @layer base {
@@ -146,4 +153,105 @@ body {
     body {
         @apply bg-background text-foreground;
     }
+}
+
+.prose {
+  margin: 0 !important;
+}
+
+pre {
+  padding: 2px 0 !important;
+  width: inherit !important;
+  overflow-x: auto;
+}
+
+pre>code {
+  display: grid;
+  max-width: inherit !important;
+  padding: 14px 0 !important;
+}
+
+.code-line {
+  padding: 0.75px 16px;
+  @apply border-l-2 border-transparent;
+}
+
+.line-number::before {
+  display: inline-block;
+  width: 1rem;
+  margin-right: 22px;
+  margin-left: -2px;
+  color: rgb(110, 110, 110);
+  content: attr(line);
+  font-size: 13.5px;
+  text-align: right;
+}
+
+.highlight-line {
+  @apply bg-primary/5 border-l-2 border-primary/30;
+}
+
+.rehype-code-title {
+  @apply px-2 -mb-10 w-full text-sm pb-5 font-medium mt-5;
+}
+
+.highlight-comp>code {
+  background-color: transparent !important;
+}
+
+/* Global Custom Scrollbar */
+:root {
+  --scrollbar-thumb: rgba(113,
+      113,
+      122,
+      0.6);
+  /* Subtle dark gray for light mode thumb */
+}
+
+[data-theme="dark"],
+[class*="dark"] {
+  --scrollbar-thumb: rgba(160,
+      160,
+      160,
+      0.4);
+  /* Softer gray for dark mode thumb */
+}
+
+/* Apply globally */
+* {
+  scrollbar-width: thin;
+  /* Firefox thin scrollbar */
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  /* Thumb color with transparent track */
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  /* Vertical scrollbar width */
+  height: 8px;
+  /* Horizontal scrollbar height */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  /* Thumb color */
+  border-radius: 9999px;
+  /* Fully rounded thumb */
+  border: 2px solid transparent;
+  /* Thin padding effect */
+  background-clip: content-box;
+  /* Smooth thumb edges */
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+  /* Transparent track */
+}
+
+.rehype-code-title {
+  @apply flex items-center gap-2
+}
+
+td>code {
+  word-break: keep-all !important;
 }

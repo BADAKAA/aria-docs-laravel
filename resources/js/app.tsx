@@ -1,7 +1,6 @@
 import '../css/app.css';
 import 'prismjs/themes/prism.css';
 import './lib/prism-languages';
-import '../css/markdown-overrides.css';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

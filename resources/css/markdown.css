@@ -1,13 +1,13 @@
 .markdown h1 {
-    @apply font-bold text-2xl md:text-3xl mb-2;
+    @apply font-bold text-headings text-2xl md:text-3xl mb-2;
 }
 
 .markdown h2 {
-    @apply font-semibold text-xl md:text-2xl mb-2;
+    @apply font-semibold text-headings text-xl md:text-2xl mb-2;
 }
 
 .markdown h3 {
-    @apply font-semibold text-lg md:text-xl mb-2;
+    @apply font-semibold text-headings text-lg md:text-xl mb-2;
 }
 .markdown h4, .markdown h5, .markdown h6 {
     @apply font-semibold mb-1;
@@ -15,4 +15,47 @@
 
 .markdown p {
     @apply mb-2;
+}
+
+/* Markdown list and code block overrides to align with Next blog styling */
+
+/* Lists */
+.markdown ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+.markdown ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+.markdown li { margin: 0.25rem 0; }
+
+/* Code title above blocks (from rehype-code-titles) */
+.markdown .rehype-code-title {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 12.5px; font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: -1rem;
+}
+.markdown .code-icon { margin-right: 0.25rem; }
+
+/* Code blocks */
+.markdown pre { 
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow: auto;
+  margin: 0.75rem 0 1rem;
+  line-height: 1.6;
+
+}
+
+/* Ensure Prism blocks inherit our background/border */
+pre[class*="language-"], code[class*="language-"] {@apply !bg-stone-50; }
+.markdown pre[class*="language-"] { border: 1px solid var(--border); }
+
+/* Inline code */
+.markdown p > code,
+.markdown li > code,
+.markdown td > code,
+.markdown th > code {
+  background: color-mix(in oklch, var(--muted) 60%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.875rem;
 }

@@ -6,7 +6,6 @@ import { SharedData } from "@/types";
 import { dashboard, login, register } from "@/routes";
 import { Button } from "./ui/button";
 import { index as blogIndex } from "@/routes/blog";
-import DocsIndex from "@/pages/docs";
 import { index as docsIndex } from "@/routes/docs";
 
 export function Header({

@@ -85,7 +85,7 @@ export default function Pagination({
         const visitData: Record<string, unknown> = {};
         if (tabName) visitData.open = tabName;
         if (!prevent && link.url) {
-            router.visit(link.url, { data: visitData, preserveScroll: true });
+            router.visit(link.url, { data: visitData as any, preserveScroll: true } as any);
         }
     };
 

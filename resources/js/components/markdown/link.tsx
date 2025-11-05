@@ -1,14 +1,15 @@
-import NextLink from "next/link";
-import { ComponentProps } from "react";
+import { Link } from '@inertiajs/react';
+import { ComponentProps } from 'react';
 
-export default function Link({ href, ...props }: ComponentProps<"a">) {
+export default function MarkdownLink({ href, ...props }: ComponentProps<'a'>) {
   if (!href) return null;
+  const isExternal = typeof href === 'string' && /^(https?:)?\/\//.test(href);
+  if (isExternal) {
+    return <a href={href} {...props} target="_blank" rel="noopener noreferrer" />;
+  }
   return (
-    <NextLink
-      href={href}
-      {...props}
-      target="_blank"
-      rel="noopener noreferrer"
-    />
+    <Link href={href as any} {...(props as any)}>
+      {props.children as any}
+    </Link>
   );
 }

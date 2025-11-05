@@ -1,8 +1,7 @@
 import GuestLayout from '@/layouts/guest-layout';
 import { Post } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import ReactMarkdown from 'react-markdown';
-import { rmComponents, rmRemarkPlugins, rmRehypePlugins } from '@/lib/markdown-react';
+import { MDXProviderWrapper, loadAllDocs } from '@/lib/markdown';
 import { Typography } from '@/components/typography';
 import { Leftbar } from '@/components/leftbar';
 import Toc from '@/components/toc';
@@ -31,6 +30,10 @@ export default function Documentation() {
 
     const tocItems = extractTocFromMarkdown(post.content || '');
 
+    // Resolve MDX component by slug using eager MDX modules for SSR
+    const docs = loadAllDocs();
+    const currentDoc = docs.find(d => d.slug === post.slug);
+
     return (
         <GuestLayout fullWidth>
             <Head title={post.title} />
@@ -45,14 +48,13 @@ export default function Documentation() {
                                 <p className="mb-4 text-muted-foreground sm:text-[16.5px] text-[14.5px]">{post.summary}</p>
                             )}
                             <div>
-                                {post.content ? (
-                                    <ReactMarkdown
-                                        remarkPlugins={rmRemarkPlugins as any}
-                                        rehypePlugins={rmRehypePlugins as any}
-                                        components={rmComponents}
-                                    >
-                                        {post.content}
-                                    </ReactMarkdown>
+                                {currentDoc ? (
+                                    <MDXProviderWrapper>
+                                        <currentDoc.Component />
+                                    </MDXProviderWrapper>
+                                ) : post.content ? (
+                                    // Fallback to markdown renderer if no MDX module matched
+                                    <div className="prose dark:prose-invert">{post.content}</div>
                                 ) : (
                                     <p className="mt-6 text-muted-foreground">No content.</p>
                                 )}

@@ -1,0 +1,9 @@
+/// <reference types="vite/client" />
+
+declare module '*.mdx' {
+  import type { ComponentType } from 'react';
+  import type { MDXProps } from 'mdx/types';
+  export const frontmatter: Record<string, any> | undefined;
+  const MDXComponent: ComponentType<MDXProps>;
+  export default MDXComponent;
+}

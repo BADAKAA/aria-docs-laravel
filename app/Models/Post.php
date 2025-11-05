@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Traits\HasCover;
+use App\Traits\Orderable;
 use App\Traits\SelectExcept;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model {
 
-    use HasFactory, HasCover, SelectExcept;
+    use HasFactory, HasCover, Orderable, SelectExcept;
     
     protected $fillable = [
         'author_id',
@@ -22,6 +23,7 @@ class Post extends Model {
         'type',
         'status',
         'category',
+        'position',
         'content',
         'cover_path',
         'published_at',
@@ -60,5 +62,17 @@ class Post extends Model {
 
     public function fallbackCoverUrl(): ?string {
         return asset('img/default-blog-cover.webp');
+    }
+
+    protected function orderWhere(): array {
+        return [[['type','=',PostType::DOC->value], ['parent_id','=',$this->parent_id]]];
+    }
+
+    protected function orderingIsAllowed(): bool {
+        return true;
+    }
+    
+    protected function assignOrderOnCreation(): bool {
+        return $this->type === PostType::DOC->value;
     }
 }

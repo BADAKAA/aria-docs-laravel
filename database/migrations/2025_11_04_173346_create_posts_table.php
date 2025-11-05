@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->tinyInteger('type')->default(0);
             $table->tinyInteger('status')->default(0);
+            $table->unsignedBigInteger('position')->nullable();
             $table->string('cover_path')->nullable();
             $table->longText('content');
             $table->dateTime('published_at')->nullable();

@@ -46,6 +46,7 @@ export default function Documentation() {
                     <div className="flex items-start gap-10">
                         <div className="flex-[4.5] mx-auto">
                             <Breadcrumbs breadcrumbs={breadcrumbs} />
+                            <div className="h-5"></div>
                             <Typography>
                                 <h1 className="sm:text-3xl text-2xl !-mt-0.5">{post.title}</h1>
                                 {post.summary && (

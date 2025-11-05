@@ -1,9 +1,10 @@
 import { home } from '@/routes';
 import AppLogoIcon from './app-logo-icon';
+import { Link } from '@inertiajs/react';
 
 export default function AppLogo() {
     return (
-        <a href={home().url} className="flex items-center gap-2">
+        <Link href={home()} prefetch className="flex items-center gap-2">
             <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                 <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
             </div>
@@ -12,6 +13,6 @@ export default function AppLogo() {
                     Fizzy Docs
                 </span>
             </div>
-        </a>
+        </Link>
     );
 }

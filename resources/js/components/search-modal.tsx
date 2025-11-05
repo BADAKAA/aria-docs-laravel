@@ -114,8 +114,14 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-black/40 p-4">
-      <div className="w-full max-w-2xl rounded-lg bg-background border shadow-xl">
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center bg-black/40 p-4"
+      onClick={() => onClose()}
+    >
+      <div
+        className="w-full max-w-2xl rounded-lg bg-background border shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={cn('flex items-center gap-2 px-3 py-2',query ? 'border-b':'')}>
           <Search className="size-4 text-muted-foreground" />
           <input
@@ -125,7 +131,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             placeholder="Search by title or summary"
             className="flex-1 bg-transparent outline-none text-sm py-2"
           />
-          <button onClick={onClose} className="rounded-md px-2 py-1 text-sm hover:bg-muted">
+          <button onClick={onClose} className="rounded-md cursor-pointer px-2 py-2 text-sm hover:bg-muted">
             <X className="size-4" />
           </button>
         </div>

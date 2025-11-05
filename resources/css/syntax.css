@@ -1,17 +1,21 @@
 .keyword {
-  color: #d73a49; /* GitHub Red */
+  color: #d73a49 !important; /* GitHub Red */
+}
+.token.operator {
+  background: transparent !important;
+  color: inherit !important; 
 }
 
 .function {
-  color: #6f42c1; /* GitHub Purple */
+  color: #6f42c1 !important; /* GitHub Purple */
 }
 
 .punctuation {
-  color: #24292e; /* GitHub Black */
+  color: #24292e !important; /* GitHub Black */
 }
 
 .comment {
-  color: #6a737d; /* GitHub Muted Gray */
+  color: #6a737d !important; /* GitHub Muted Gray */
 }
 
 .string,
@@ -19,36 +23,36 @@
 .annotation,
 .boolean,
 .number {
-  color: #005cc5; /* GitHub Blue */
+  color: #005cc5 !important; /* GitHub Blue */
 }
 
 .tag {
-  color: #22863a; /* GitHub Green */
+  color: #22863a !important; /* GitHub Green */
 }
 
 .attr-name {
-  color: #6f42c1; /* GitHub Purple */
+  color: #6f42c1 !important; /* GitHub Purple */
 }
 
 .attr-value {
-  color: #e36209; /* GitHub Orange */
+  color: #e36209 !important; /* GitHub Orange */
 }
 
 /* Dark Mode */
 .dark .keyword {
-  color: #f97583; /* GitHub Light Red */
+  color: #f97583 !important; /* GitHub Light Red */
 }
 
 .dark .function {
-  color: #d2a8ff; /* GitHub Light Purple */
+  color: #d2a8ff !important; /* GitHub Light Purple */
 }
 
 .dark .punctuation {
-  color: #c9d1d9; /* GitHub Light Gray */
+  color: #c9d1d9 !important; /* GitHub Light Gray */
 }
 
 .dark .comment {
-  color: #8b949e; /* GitHub Muted Gray */
+  color: #8b949e !important; /* GitHub Muted Gray */
 }
 
 .dark .string,
@@ -56,17 +60,31 @@
 .dark .annotation,
 .dark .boolean,
 .dark .number {
-  color: #79c0ff; /* GitHub Light Blue */
+  color: #79c0ff !important; /* GitHub Light Blue */
 }
 
 .dark .tag {
-  color: #a5d6ff; /* GitHub Cyan */
+  color: #a5d6ff !important; /* GitHub Cyan */
 }
 
 .dark .attr-name {
-  color: #d2a8ff; /* GitHub Light Purple */
+  color: #d2a8ff !important; /* GitHub Light Purple */
 }
 
 .dark .attr-value {
-  color: #ffa657; /* GitHub Light Orange */
+  color: #ffa657 !important; /* GitHub Light Orange */
+}
+
+
+:not(pre) > code[class*="language-"], pre[class*="language-"] {
+  background: transparent !important;
+}
+
+.prose-code\:bg-stone-50 :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  --tw-bg-opacity: 1;
+  margin-top: 0.25rem;
+  background-color: rgb(250 250 249 / var(--tw-bg-opacity)) !important;
+}
+.prose code[class*="language-"], .prose pre[class*="language-"] {
+  font-family: var(--font-mono) !important;
 }

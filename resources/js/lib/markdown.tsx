@@ -6,7 +6,9 @@ import Files from '../components/markdown/files';
 import Image from '../components/markdown/image';
 import type { ComponentType, ReactNode } from 'react';
 import LinkCmp from '../components/markdown/link';
+import Outlet from '../components/markdown/outlet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { page_routes } from './routes-config';
 import {
   Table,
   TableBody,
@@ -28,6 +30,7 @@ export const mdxComponents: Record<string, any> = {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Outlet,
   pre: Pre as any,
   Note: Note as any,
   Stepper: Stepper as any,
@@ -135,12 +138,17 @@ export type BaseMdxFrontmatter = {
 };
 
 // Client-safe child discovery using the globbed MDX module list
-export async function getAllChilds(pathString: string) {
+export function getAllChilds(pathString: string) {
   const docs = loadAllDocs();
-  const baseDepth = pathString.split('/').filter(Boolean).length;
+  // Normalize provided path (remove leading/trailing slashes)
+  // Trim slashes and an optional 'docs/' prefix so callers can pass '/docs/..' or '/..'
+  let normalized = pathString.replace(/^\/+|\/+$/g, '');
+  normalized = normalized.replace(/^(?:docs\/)+/, '');
+  const baseDepth = normalized.split('/').filter(Boolean).length;
   const children = docs.filter((d) => {
-    if (!d.slug.startsWith(pathString.replace(/\/$/, '') + '/')) return false;
-    const depth = d.slug.split('/').filter(Boolean).length;
+    const slug = d.slug.replace(/^\/+|\/+$/g, '');
+    if (!slug.startsWith(normalized + '/')) return false;
+    const depth = slug.split('/').filter(Boolean).length;
     return depth === baseDepth + 1;
   });
   return children.map((d) => ({
@@ -148,4 +156,16 @@ export async function getAllChilds(pathString: string) {
     description: d.frontmatter?.description ?? '',
     href: `/docs/${d.slug}`,
   })) as (BaseMdxFrontmatter & { href: string })[];
+}
+
+// Previous/Next utilities mirroring the Next app
+export function getPreviousNext(path: string) {
+  // normalize to match page_routes hrefs (no leading '/docs')
+  let normalized = path.replace(/^\/+|\/+$/g, '');
+  normalized = normalized.replace(/^(?:docs\/)+/, '');
+  const index = page_routes.findIndex(({ href }) => href === `/${normalized}`);
+  return {
+    prev: index > 0 ? page_routes[index - 1] : undefined,
+    next: index >= 0 && index < page_routes.length - 1 ? page_routes[index + 1] : undefined,
+  };
 }

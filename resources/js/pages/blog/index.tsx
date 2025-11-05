@@ -9,7 +9,7 @@ export default function BlogIndex() {
     const posts = usePage().props.posts as any;
     
     return (
-        <GuestLayout fullWidth>
+        <GuestLayout>
             <Head title="Blog" />
             <div className="flex flex-col gap-1 sm:min-h-[91vh] min-h-[88vh] pt-2">
                 <div className="mb-7 flex flex-col gap-2">

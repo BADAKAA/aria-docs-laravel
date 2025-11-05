@@ -1,19 +1,16 @@
 import type { TocItem } from "@/lib/markdown-react";
+import TocObserver from "./toc-observer";
 
 export default function Toc({ items }: { items: TocItem[] }) {
   if (!items?.length) return null;
   return (
-    <aside className="hidden xl:block flex-[1.5] sticky top-20 max-h-[80vh] overflow-auto pl-2">
-      <div className="text-sm text-muted-foreground mb-2">On this page</div>
-      <ul className="text-sm space-y-1">
-        {items.map((h) => (
-          <li key={h.href} className={h.level === 2 ? "pl-0" : h.level === 3 ? "pl-3" : "pl-6"}>
-            <a href={h.href} className="text-foreground/80 hover:text-foreground">
-              {h.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </aside>
+    <div className="xl:flex toc hidden w-[20rem] py-9 sticky top-16 h-[96.95vh] pl-6">
+      <div className="flex flex-col gap-3 w-full pl-2">
+        <h3 className="text-sm">On this page</h3>
+        <div className="pb-2 pt-0.5 overflow-y-auto">
+          <TocObserver data={items} />
+        </div>
+      </div>
+    </div>
   );
 }

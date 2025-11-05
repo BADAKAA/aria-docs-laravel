@@ -1,8 +1,9 @@
 @import 'tailwindcss';
-@import './markdown.css';
 @import './syntax.css';
 
 @import "tw-animate-css";
+
+@plugin "@tailwindcss/typography";
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -10,15 +11,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
-body {
-    color: var(--foreground);
-}
 
 @theme {
     --font-sans:
         'Space Grotesk', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+
+    --font-mono: 'Space Mono', ui-monospace, monospace;
+
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -254,8 +255,9 @@ pre>code {
 }
 
 .rehype-code-title {
-  @apply flex items-center gap-2
+  @apply flex items-center gap-2 px-2 -mb-10 w-full text-sm pb-5 font-medium mt-5 font-mono;
 }
+
 
 td>code {
   word-break: keep-all !important;

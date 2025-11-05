@@ -1,9 +1,9 @@
 import { BaseMdxFrontmatter, getAllChilds } from "../../lib/markdown";
 import { Link } from '@inertiajs/react';
 
-export default async function Outlet({ path }: { path: string }) {
+export default function Outlet({ path }: { path: string }) {
   if (!path) throw new Error("path not provided");
-  const output = await getAllChilds(path);
+  const output = getAllChilds(path);
 
   return (
     <div className="grid md:grid-cols-2 gap-5">

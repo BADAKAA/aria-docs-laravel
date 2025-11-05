@@ -153,7 +153,7 @@ function MenuLevel({ items, childrenOf, current, openParents, toggleParent, dept
                 <button
                   type="button"
                   onClick={() => toggleParent(item.id)}
-                  className="cursor-pointer shrink-0 mr-1 h-5 w-5 flex items-center justify-center text-foreground/70 hover:text-foreground"
+                  className="cursor-pointer shrink-0 mr-1 h-5 w-5 flex items-center justify-center dark:text-stone-300/85 text-stone-800"
                   aria-label={expanded ? 'Collapse' : 'Expand'}
                   aria-expanded={expanded}
                 >

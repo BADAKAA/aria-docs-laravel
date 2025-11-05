@@ -14,8 +14,8 @@ interface AppLayoutProps {
 export default ({ children, breadcrumbs, fullWidth = false, ...props }: AppLayoutProps) => (
     <div className="flex flex-col min-h-screen">
         <Header />
-        <div className={cn('grow mx-auto w-full flex flex-col items-start px-2 md:px-8', fullWidth ? '' : 'max-w-4xl')}>
+        <main className={cn('', fullWidth ? '' : 'sm:container mx-auto w-[90vw] h-auto scroll-smooth')}>
             {children}
-        </div>
+        </main>
     </div>
 );

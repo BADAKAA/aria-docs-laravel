@@ -44,7 +44,7 @@ export default function Documentation() {
                 <Leftbar />
                 <div className="flex-[5.25]">
                     <div className="flex items-start gap-10">
-                        <div className="flex-[4.5] mx-auto">
+                        <div className="flex-[4.5] mx-auto py-4 md:py-10">
                             <Breadcrumbs breadcrumbs={breadcrumbs} />
                             <div className="h-5"></div>
                             <Typography>

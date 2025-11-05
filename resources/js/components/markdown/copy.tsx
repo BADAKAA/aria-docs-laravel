@@ -37,7 +37,7 @@ export default function Copy({ content }: { content: string }) {
   return (
     <Button
       variant="secondary"
-      className="border h-7 px-2 py-1"
+      className="border h-7 !px-2.5 !py-4"
       size="sm"
       onClick={handleCopy}
     >

@@ -10,7 +10,7 @@ export default function AppLogo() {
             </div>
             <div className="grid flex-1 text-left text-sm">
                 <span className="truncate leading-tight font-semibold">
-                    Fizzy Docs
+                    AriaDocs
                 </span>
             </div>
         </Link>

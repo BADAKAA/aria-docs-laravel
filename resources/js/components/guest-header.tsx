@@ -111,7 +111,7 @@ export function Header({
             </span>
           </button>
           <div className="flex items-center justify-between sm:gap-2">
-            <Link href="https://github.com/nisabmohd/NexDocs" >
+            <Link href="https://github.com/BADAKAA/aria-docs-laravel" >
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
                 <Github className="size-4" />
               </Button>

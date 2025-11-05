@@ -13,7 +13,7 @@ export default function Welcome() {
             </Head>
             <div className='flex flex-col sm:items-center justify-center m-auto'>
             <a
-                href="https://github.com/BADAKAA/fizzy-docs"
+                href="https://github.com/BADAKAA/aria-docs-laravel"
                 target="_blank"
                 rel="noreferrer"
                 className="mb-5 sm:text-lg flex items-center gap-2 underline underline-offset-4 sm:-mt-12"

@@ -5,6 +5,9 @@ import { Link, usePage } from "@inertiajs/react";
 import { SharedData } from "@/types";
 import { dashboard, login, register } from "@/routes";
 import { Button } from "./ui/button";
+import { index as blogIndex } from "@/routes/blog";
+import DocsIndex from "@/pages/docs";
+import { index as docsIndex } from "@/routes/docs";
 
 export function Header({
   canRegister = true,
@@ -13,14 +16,15 @@ export function Header({
 }) {
 
   const auth = usePage<SharedData>().props.auth;
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
   return (
     <nav className="w-full border-b h-16 mb-8 sticky top-0 z-50 bg-background">
       <div className="container mx-auto w-[95vw] h-full flex items-center justify-between gap-2">
         <div className="flex items-center gap-5">
           <AppLogo />
           <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
-            <a className="hover:text-foreground" href="/docs">Documentation</a>
-            <a className="hover:text-foreground" href="/blog">Blog</a>
+            <a className={`hover:text-foreground ${currentPath.startsWith('/docs') ? 'font-semibold text-foreground' : ''}`} href={docsIndex().url}>Documentation</a>
+            <a className={`hover:text-foreground ${currentPath.startsWith('/blog') ? 'font-semibold text-foreground' : ''}`} href={blogIndex().url}>Blog</a>
             <a className="hover:text-foreground" href="#">Examples</a>
             <a className="hover:text-foreground" href="#">Guides</a>
             <a className="hover:text-foreground" href="https://github.com/nisabmohd/Aria-Docs/discussions">Community</a>
@@ -36,7 +40,7 @@ export function Header({
               className="w-full bg-transparent px-3 py-2 outline-none text-sm"
               aria-label="Search docs"
             />
-            <div className="absolute right-2 top-2 hidden sm:flex items-center gap-1 text-xs font-code text-muted-foreground">
+            <div className="absolute right-2 top-2 hidden sm:flex items-center gap-1 text-xs font-mono text-muted-foreground">
               <span className="border rounded px-1 py-0.5">Ctrl</span>
               <span className="border rounded px-1 py-0.5">K</span>
             </div>

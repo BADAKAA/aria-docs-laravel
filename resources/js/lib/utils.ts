@@ -80,3 +80,12 @@ export function getIconName(name: string) {
   const ext = splittedNames[splittedNames.length - 1];
   return fileExtensionIconMap[ext as keyof typeof fileExtensionIconMap];
 }
+
+
+export function ucfirst(str: string): string {
+  if (!str) return str;
+  str = str.replace(/\s+(.)/g, function (match, group1) {
+    return ' ' + group1.toUpperCase();
+  });
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

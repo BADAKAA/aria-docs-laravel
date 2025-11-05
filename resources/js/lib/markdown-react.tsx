@@ -100,3 +100,24 @@ export const rmRehypePlugins = [
 ];
 
 export type { Components as ReactMarkdownComponents };
+
+// ----- TOC helpers -----
+export type TocItem = { level: number; text: string; href: string };
+
+function sluggify(text: string) {
+  const slug = text.toLowerCase().replace(/\s+/g, "-");
+  return slug.replace(/[^a-z0-9-]/g, "");
+}
+
+export function extractTocFromMarkdown(rawMd: string): TocItem[] {
+  const headingsRegex = /^(#{2,4})\s(.+)$/gm;
+  const items: TocItem[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = headingsRegex.exec(rawMd)) !== null) {
+    const level = match[1].length; // number of #
+    const text = match[2].trim();
+    const slug = sluggify(text);
+    items.push({ level, text, href: `#${slug}` });
+  }
+  return items;
+}

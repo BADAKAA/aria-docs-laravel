@@ -10,22 +10,12 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// Public docs & blog
-Route::get('/docs', function () {
-    return Inertia::render('docs/index');
-})->name('docs.index');
-
-Route::get('/docs/{slug?}', function (string $slug = null) {
-    $parts = $slug ? explode('/', $slug) : [];
-    return Inertia::render('docs/show', [
-        'slug' => $parts,
-    ]);
-})->where('slug', '.*')->name('docs.show');
-
 Route::resource('blog', \App\Http\Controllers\BlogController::class)->only(['index', 'show']);
-
+Route::get('docs/{slug}', [\App\Http\Controllers\DocsController::class, 'show'])->where('slug', '.+')->name('docs.show');
+Route::get('docs', [\App\Http\Controllers\DocsController::class, 'index'])->name('docs.index');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('blog', \App\Http\Controllers\BlogController::class)->except(['index', 'show']);
+    Route::resource('docs', \App\Http\Controllers\DocsController::class)->except(['index', 'show']);
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');

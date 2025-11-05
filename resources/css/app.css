@@ -142,7 +142,7 @@ body {
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
 
-    --headings: oklch(0.77 0.02 0);
+    --headings: oklch(90.06% 0.0001 271.152);
 }
 
 @layer base {
@@ -157,6 +157,11 @@ body {
 
 .prose {
   margin: 0 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-headings);
+  scroll-margin: calc(var(--spacing) * 18);
 }
 
 pre {

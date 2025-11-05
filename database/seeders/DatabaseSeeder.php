@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\DocumentationSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,5 +27,7 @@ class DatabaseSeeder extends Seeder
         );
 
         Post::factory(20)->create();
+        // Seed documentation pages from MDX files
+        $this->call(DocumentationSeeder::class);
     }
 }

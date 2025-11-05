@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('author_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('parent_id')->nullable()->constrained('posts')->onDelete('cascade');
             $table->string('title');
-            $table->string('summary')->nullable();
+            $table->string('category')->nullable();
+            $table->string('summary', 512)->nullable();
             $table->string('slug')->unique();
             $table->tinyInteger('type')->default(0);
             $table->tinyInteger('status')->default(0);

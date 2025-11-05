@@ -21,6 +21,7 @@ class Post extends Model {
         'summary',
         'type',
         'status',
+        'category',
         'content',
         'cover_path',
         'published_at',

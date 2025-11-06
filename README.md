@@ -5,4 +5,22 @@ This project is an extension of the [AriaDocs](https://github.com/nisabmohd/Aria
 ## Features
 - Admin Dashboard
 - Markdown editor with live preview
-- drag-and-drop interface to order and categorise the documentation
+- Drag-and-drop interface to order and categorise the documentation
+- integrated search
+
+
+## Project Setup
+````
+npm i && php artisan:migrate --seed
+````
+### Deployment
+````
+npm run build
+````
+### Development
+````
+npm run dev
+````
+````
+php artisan serve
+````

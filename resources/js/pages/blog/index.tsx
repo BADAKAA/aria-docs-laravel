@@ -11,7 +11,7 @@ export default function BlogIndex() {
     return (
         <GuestLayout>
             <Head title="Blog" />
-            <div className="flex flex-col gap-1 sm:min-h-[91vh] min-h-[88vh] pt-2">
+            <div className="flex flex-col gap-1 sm:min-h-[91vh] min-h-[88vh] pt-10">
                 <div className="mb-7 flex flex-col gap-2">
                     <h1 className="sm:text-3xl text-2xl font-extrabold">
                         The latest blogs of this product

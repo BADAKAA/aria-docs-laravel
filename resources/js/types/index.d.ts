@@ -52,6 +52,8 @@ export interface Post {
     author: User;
     type: number;
     status: number;
+    position?: number;
+    parent_id?: number | null;
     content: string;
     category?: string;
     published_at: string;

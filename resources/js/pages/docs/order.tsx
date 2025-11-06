@@ -1,43 +1,20 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, usePage, router } from '@inertiajs/react';
-import { type BreadcrumbItem } from '@/types';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Post, type BreadcrumbItem } from '@/types';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { useDragTouch } from '@/hooks/useDragTouch';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { order } from '@/routes/docs';
+import { buildTree, flattenWithPositions, reindex } from './partials/tree-utils';
+import { SiblingList } from './partials/tree-list';
 
 // Minimal tree DnD without external deps: flat list with parent selection and drag sorting within siblings
 // Payload shape expected by backend: { items: Array<{ id: number; parent_id: number | null; position: number }> }
 
-type DocItem = { id: number; title: string; slug: string; category: string | null; parent_id: number | null; position: number };
-
-type TreeNode = DocItem & { children: TreeNode[] };
-
-function buildTree(items: DocItem[]): TreeNode[] {
-    const map = new Map<number, TreeNode>();
-    const roots: TreeNode[] = [];
-    items.forEach((it) => map.set(it.id, { ...it, children: [] }));
-    map.forEach((node) => {
-        if (node.parent_id != null && map.has(node.parent_id)) {
-            map.get(node.parent_id)!.children.push(node);
-        } else {
-            roots.push(node);
-        }
-    });
-    const sortChildren = (nodes: TreeNode[]) => {
-        nodes.sort((a, b) => a.position - b.position || a.id - b.id);
-        nodes.forEach((n) => sortChildren(n.children));
-    };
-    sortChildren(roots);
-    return roots;
-}
-
 export default function DocsOrderPage() {
     const page = usePage().props as any;
-    const docs = page.docs as DocItem[];
-    const [list, setList] = useState<DocItem[]>(docs);
+    const docs = page.docs as Post[];
+    const [list, setList] = useState<Post[]>(docs);
 
     useEffect(() => setList(docs), [docs]);
 
@@ -66,15 +43,6 @@ export default function DocsOrderPage() {
             setPreviewRect({ top: r.bottom, left: r.left, width: r.width });
         }
     }, [preview]);
-
-    const flattenWithPositions = (nodes: TreeNode[], parent_id: number | null) => {
-        const res: { id: number; parent_id: number | null; position: number }[] = [];
-        nodes.forEach((n, idx) => {
-            res.push({ id: n.id, parent_id, position: idx });
-            if (n.children.length) res.push(...flattenWithPositions(n.children, n.id));
-        });
-        return res;
-    };
 
     const onSave = () => {
         const payload = { items: flattenWithPositions(tree, null) };
@@ -140,7 +108,7 @@ export default function DocsOrderPage() {
         targetIds.splice(insertIndex, 0, dragId);
 
         // Create maps of updated items
-        const updates: DocItem[] = [];
+        const updates: Post[] = [];
         // Reindex old siblings (if parent changed)
         if (fromParent !== toParent) {
             const reOld = reindex(oldIds.map((id) => oldSiblings.find((s) => s.id === id)!));
@@ -157,17 +125,13 @@ export default function DocsOrderPage() {
     };
 
     // Indent/Outdent helpers
-    const getChildren = (pid: number | null) => list.filter((x) => (x.parent_id || null) === (pid || null)).sort((a, b) => a.position - b.position || a.id - b.id);
-    const reindex = (items: DocItem[]) => items.map((x, i) => ({ ...x, position: i }));
-    const applyUpdates = (updated: DocItem[]) => {
+    const getChildren = (pid: number | null) =>
+        list
+            .filter((x) => (x.parent_id || null) === (pid || null))
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.id - b.id);
+    const applyUpdates = (updated: Post[]) => {
         const map = new Map(updated.map((x) => [x.id, x] as const));
         setList((prev) => prev.map((x) => (map.has(x.id) ? map.get(x.id)! : x)));
-    };
-    // Flatten in the same visual order we render: all rows at this level, then recursively children of each node, in order
-    const flattenVisible = (nodes: TreeNode[]): number[] => {
-        const idsAtLevel = nodes.map((n) => n.id);
-        const childrenIds = nodes.flatMap((n) => flattenVisible(n.children));
-        return [...idsAtLevel, ...childrenIds];
     };
     const indent = (id: number) => {
         const node = list.find((x) => x.id === id);
@@ -259,89 +223,10 @@ export default function DocsOrderPage() {
                         className="text-foreground"
                     />
                 )}
-                <p className="text-xs text-muted-foreground">Tip: Drag a row onto a sibling to re-order within the same level. Drag a row onto a parent title to nest it under that parent.</p>
+                <p className="text-xs text-muted-foreground">
+                    Tip: Drag a row onto a sibling to re-order within the same level. Drag a row onto a parent title to nest it under that parent.
+                </p>
             </div>
         </AppLayout>
-    );
-}
-
-function SiblingList({ parentId, items, depth, dragTouchHandlers, setPreview, indent, outdent }: { parentId: number | null; items: TreeNode[]; depth: number; dragTouchHandlers: (getPayload: () => any) => any; setPreview: (p: { parentId: number | null; index: number } | null) => void; indent: (id: number) => void; outdent: (id: number) => void }) {
-    const listRef = useRef<HTMLUListElement | null>(null);
-    const onContainerDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        // If we're over a row, let the row's handler compute preview
-        const target = e.target as HTMLElement;
-        if (target.closest('[data-node-id]')) return;
-        // Compute insert index based on cursor Y relative to rows at this level
-        const ul = listRef.current;
-        if (!ul) { setPreview({ parentId, index: items.length }); return; }
-        const selector = `:scope > li[data-parent-id="${String(parentId)}"][data-node-id]`;
-        const rows = Array.from(ul.querySelectorAll(selector)) as HTMLElement[];
-        if (rows.length === 0) { setPreview({ parentId, index: 0 }); return; }
-        const y = e.clientY;
-        let index = rows.length;
-        for (let i = 0; i < rows.length; i++) {
-            const r = rows[i].getBoundingClientRect();
-            if (y < r.top + r.height / 2) { index = i; break; }
-        }
-        setPreview({ parentId, index });
-    };
-    return (
-    <ul ref={listRef} onDragOver={onContainerDragOver}>
-            {items.map((node, idx) => (
-                <li key={node.id} data-node-id={node.id} data-parent-id={String(parentId)} data-index={idx} className="not-last:pb-2 first:pt-2">
-                    <TreeNodeRow idx={idx} node={node} depth={depth} parentId={parentId} dragTouchHandlers={dragTouchHandlers} setPreview={setPreview} indent={indent} outdent={outdent} />
-                    {node.children.length > 0 ? (
-                        <SiblingList
-                            parentId={node.id}
-                            items={node.children}
-                            depth={depth + 1}
-                            dragTouchHandlers={dragTouchHandlers}
-                            setPreview={setPreview}
-                            indent={indent}
-                            outdent={outdent}
-                        />
-                    ) : null}
-                </li>
-            ))}
-        </ul>
-    );
-}
-
-function TreeNodeRow({ node, idx, depth, parentId, dragTouchHandlers, setPreview, indent, outdent }: { node: TreeNode; idx: number; depth: number; parentId: number | null; dragTouchHandlers: (getPayload: () => any) => any; setPreview: (p: { parentId: number | null; index: number } | null) => void; indent: (id: number) => void; outdent: (id: number) => void }) {
-    const onDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const before = e.clientY < rect.top + rect.height / 2;
-        setPreview({ parentId, index: before ? idx : idx + 1 });
-    };
-    const onDragOverTitle = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Dropping over the title nests under this node, appended to its children
-        setPreview({ parentId: node.id, index: node.children.length });
-    };
-    return (
-        <div
-            {...dragTouchHandlers(() => ({ id: node.id }))}
-            onDragOver={onDragOver}
-            className="flex items-center gap-2 rounded-md border px-2 py-1 bg-background hover:bg-muted/50"
-            style={{ marginLeft: depth * 16 }}
-        >
-            <span className="cursor-grab select-none text-muted-foreground">⁞⁞</span>
-            <div className="flex-1 min-w-0 drop-as-child" onDragOver={onDragOverTitle}>
-                <div className="font-medium truncate">{node.title}</div>
-                <div className="text-xs text-muted-foreground truncate">/{node.slug}</div>
-            </div>
-            <div className="flex items-center gap-1">
-                <Button type="button" variant="ghost" className="h-7 px-2" title="Outdent" onClick={() => outdent(node.id)}>
-                    <ArrowLeft className="size-4" />
-                </Button>
-                <Button type="button" variant="ghost" className="h-7 px-2" title="Indent" onClick={() => indent(node.id)}>
-                    <ArrowRight className="size-4" />
-                </Button>
-            </div>
-        </div>
     );
 }

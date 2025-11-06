@@ -31,7 +31,6 @@ class Post extends Model {
 
     protected $appends = ['cover_url'];
 
-
     public function author() {
         return $this->belongsTo(User::class, 'author_id');
     }

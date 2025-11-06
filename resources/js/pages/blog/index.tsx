@@ -42,9 +42,7 @@ function BlogCard({ post }: { post: Post }) {
                 <img
                     src={post.cover_url}
                     alt={post.title}
-                    width={400}
-                    height={150}
-                    className="w-full rounded-md object-cover h-[180px] border"
+                    className="w-full rounded-md aspect-[2/1] object-cover border"
                 />
             </div>
             <p className="text-sm text-muted-foreground mb-2">{post.summary}</p>

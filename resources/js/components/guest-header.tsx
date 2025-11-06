@@ -1,4 +1,4 @@
-import { Edit, Github, Search, Menu } from "lucide-react";
+import { Edit, Github, Search, Menu, LogIn } from "lucide-react";
 import AppLogo from "./app-logo";
 import AppearanceToggleDropdown from "./appearance-dropdown";
 import { Link, usePage } from "@inertiajs/react";
@@ -111,17 +111,17 @@ export function Header({
             </span>
           </button>
           <div className="flex items-center justify-between sm:gap-2">
+            <Link href={dashboard()}>
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
+                <Edit className="size-4" />
+              </Button>
+            </Link>
             <Link href="https://github.com/BADAKAA/aria-docs-laravel" >
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
                 <Github className="size-4" />
               </Button>
             </Link>
             <AppearanceToggleDropdown />
-            <Link href={dashboard()}>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
-                <Edit className="size-4" />
-              </Button>
-            </Link>
           </div>
         </div>
       </div>

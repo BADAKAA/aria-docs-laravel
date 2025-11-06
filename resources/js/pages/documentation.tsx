@@ -1,6 +1,6 @@
 import GuestLayout from '@/layouts/guest-layout';
 import { Post } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { MDXProviderWrapper, loadAllDocs, getPreviousNext } from '@/lib/markdown';
 import { Typography } from '@/components/typography';
 import { Leftbar } from '@/components/leftbar';
@@ -9,10 +9,13 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { extractTocFromMarkdown } from '@/lib/markdown-react';
 import { ucfirst } from '@/lib/utils';
 import DocsPagination from '@/components/docs-pagination';
+import { Edit, Pencil } from 'lucide-react';
 
 
 export default function Documentation() {
-    const post = usePage().props.post as Post;
+    const page = usePage().props as any;
+    const post = page.post as Post;
+    const isLoggedIn = Boolean(page?.auth?.user || page?.user);
     const parents = post.slug.split('/').map(part => ({
         title: ucfirst(part.replaceAll('-', ' ')),
         href: '/docs/' + (post.slug?.split('/').slice(0, post.slug!.split('/').indexOf(part) + 1).join('/') ?? ''),
@@ -48,7 +51,16 @@ export default function Documentation() {
                             <Breadcrumbs breadcrumbs={breadcrumbs} />
                             <div className="h-5"></div>
                             <Typography>
-                                <h1 className="sm:text-3xl text-2xl !-mt-0.5">{post.title}</h1>
+                                <h1 className="sm:text-3xl text-2xl !-mt-0.5">
+                                    {isLoggedIn ? (
+                                        <Link href={`/posts/${post.id}/edit`} className="flex  gap-2 items-center no-underline hover:underline decoration-dotted">
+                                            {post.title}
+                                            <Edit className='size-[1em]'/>
+                                        </Link>
+                                    ) : (
+                                        post.title
+                                    )}
+                                </h1>
                                 {post.summary && (
                                     <p className="mb-4 text-muted-foreground sm:text-[16.5px] text-[14.5px]">{post.summary}</p>
                                 )}

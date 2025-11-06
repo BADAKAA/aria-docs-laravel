@@ -21,9 +21,44 @@ Route::get('docs', [DocsController::class, 'index'])->name('docs.index');
 Route::get('/search', [PostController::class, 'search'])->name('search.index');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('post', PostController::class);
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+    Route::resource('posts', PostController::class);
+    // Cover image endpoints
+    Route::post('posts/{post}/cover', [PostController::class, 'updateCover'])->name('posts.cover.update');
+    Route::delete('posts/{post}/cover', [PostController::class, 'deleteCover'])->name('posts.cover.delete');
+    Route::get('dashboard', function (\Illuminate\Http\Request $request) {
+        $q = trim((string) $request->query('q', ''));
+        $type = $request->query('type');
+        $status = $request->query('status');
+
+        $posts = \App\Models\Post::query()
+            ->with(['author'])
+            ->when($q !== '', function ($qb) use ($q) {
+                $qb->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('summary', 'like', "%{$q}%")
+                        ->orWhere('slug', 'like', "%{$q}%");
+                });
+            })
+            ->when($type !== null && $type !== '', function ($qb) use ($type) {
+                $qb->where('type', (int) $type);
+            })
+            ->when($status !== null && $status !== '', function ($qb) use ($status) {
+                $qb->where('status', (int) $status);
+            })
+            ->orderByDesc('updated_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('dashboard', [
+            'posts' => $posts,
+            'types' => \App\Enums\PostType::toArray(),
+            'statuses' => \App\Enums\PostStatus::toArray(),
+            'filters' => [
+                'q' => $q,
+                'type' => $type,
+                'status' => $status,
+            ],
+        ]);
     })->name('dashboard');
 });
 

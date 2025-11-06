@@ -6,12 +6,14 @@ import ReactMarkdown from 'react-markdown';
 import { rmComponents, rmRemarkPlugins, rmRehypePlugins } from '@/lib/markdown-react';
 import { MDXProviderWrapper, loadAllBlogs } from '@/lib/markdown';
 import { buttonVariants } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Edit } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Typography } from '@/components/typography';
 
 export default function BlogShow() {
-    const post = usePage().props.post as Post;
+    const page = usePage().props as any;
+    const post = page.post as Post;
+    const isLoggedIn = Boolean(page?.auth?.user || page?.user);
     const blogs = loadAllBlogs();
     const mdxBlog = blogs.find(b => b.slug === post.slug);
     return (
@@ -32,7 +34,16 @@ export default function BlogShow() {
                     <p className="text-sm text-muted-foreground">
                         {formatDate(post.published_at)}
                     </p>
-                    <h1 className="sm:text-3xl text-2xl font-extrabold">{post.title}</h1>
+                    <h1 className="sm:text-3xl text-2xl font-extrabold">
+                        {isLoggedIn ? (
+                            <a href={`/posts/${post.id}/edit`} className="flex gap-2 items-center hover:underline decoration-dotted">
+                                {post.title}
+                                <Edit className='size-[1em]'/>
+                            </a>
+                        ) : (
+                            post.title
+                        )}
+                    </h1>
                     {/* {post.summary && (
                         <p className="text-muted-foreground sm:text-[16.5px] text-[14.5px]">
                             {post.summary}
@@ -60,9 +71,7 @@ export default function BlogShow() {
                         <img
                             src={post.cover_url}
                             alt={post.title}
-                            width={1200}
-                            height={480}
-                            className="w-full rounded-md object-cover max-h-[420px] border"
+                            className="w-full rounded-md object-cover aspect-[2/1] border"
                         />
                     </div>
                 )}

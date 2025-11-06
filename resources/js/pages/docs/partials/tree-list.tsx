@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { TreeNode } from './tree-utils';
 
-export type PreviewState = { parentId: number | null; index: number } | null;
+export type PreviewState = { parentId: number | null; index: number; categoryKey?: string } | null;
 
 export function SiblingList({
     parentId,
@@ -13,14 +13,16 @@ export function SiblingList({
     setPreview,
     indent,
     outdent,
+    categoryKey,
 }: {
     parentId: number | null;
     items: TreeNode[];
     depth: number;
     dragTouchHandlers: (getPayload: () => any) => any;
-    setPreview: (p: { parentId: number | null; index: number } | null) => void;
+    setPreview: (p: { parentId: number | null; index: number; categoryKey?: string } | null) => void;
     indent: (id: number) => void;
     outdent: (id: number) => void;
+    categoryKey?: string;
 }) {
     const listRef = useRef<HTMLUListElement | null>(null);
     const onContainerDragOver = (e: React.DragEvent) => {
@@ -31,13 +33,13 @@ export function SiblingList({
         // Compute insert index based on cursor Y relative to rows at this level
         const ul = listRef.current;
         if (!ul) {
-            setPreview({ parentId, index: items.length });
+            setPreview({ parentId, index: items.length, categoryKey });
             return;
         }
         const selector = `:scope > li[data-parent-id="${String(parentId)}"][data-node-id]`;
         const rows = Array.from(ul.querySelectorAll(selector)) as HTMLElement[];
         if (rows.length === 0) {
-            setPreview({ parentId, index: 0 });
+            setPreview({ parentId, index: 0, categoryKey });
             return;
         }
         const y = e.clientY;
@@ -49,7 +51,7 @@ export function SiblingList({
                 break;
             }
         }
-        setPreview({ parentId, index });
+        setPreview({ parentId, index, categoryKey });
     };
     return (
         <ul ref={listRef} onDragOver={onContainerDragOver}>
@@ -70,6 +72,7 @@ export function SiblingList({
                         setPreview={setPreview}
                         indent={indent}
                         outdent={outdent}
+                        categoryKey={categoryKey}
                     />
                     {node.children.length > 0 ? (
                         <SiblingList
@@ -80,6 +83,7 @@ export function SiblingList({
                             setPreview={setPreview}
                             indent={indent}
                             outdent={outdent}
+                            categoryKey={categoryKey}
                         />
                     ) : null}
                 </li>
@@ -97,28 +101,30 @@ export function TreeNodeRow({
     setPreview,
     indent,
     outdent,
+    categoryKey,
 }: {
     node: TreeNode;
     idx: number;
     depth: number;
     parentId: number | null;
     dragTouchHandlers: (getPayload: () => any) => any;
-    setPreview: (p: { parentId: number | null; index: number } | null) => void;
+    setPreview: (p: { parentId: number | null; index: number; categoryKey?: string } | null) => void;
     indent: (id: number) => void;
     outdent: (id: number) => void;
+    categoryKey?: string;
 }) {
     const onDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const before = e.clientY < rect.top + rect.height / 2;
-        setPreview({ parentId, index: before ? idx : idx + 1 });
+        setPreview({ parentId, index: before ? idx : idx + 1, categoryKey });
     };
     const onDragOverTitle = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         // Dropping over the title nests under this node, appended to its children
-        setPreview({ parentId: node.id, index: node.children.length });
+        setPreview({ parentId: node.id, index: node.children.length, categoryKey });
     };
     return (
         <div

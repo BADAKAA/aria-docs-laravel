@@ -30,19 +30,21 @@ class DocsController extends Controller {
             ->orderBy('parent_id')
             ->orderBy('position')
             ->orderBy('id')
-            ->get(['id','title','slug','category','parent_id','position']);
+            ->get(['id','title','slug','category','parent_id','position'])
+            ->groupBy('category');
         return Inertia::render('docs/order', [
             'docs' => $docs,
         ]);
     }
 
     public function updateOrder(Request $request) {
-        // Payload: array of { id: number, parent_id: number|null, position: number }
+        // Payload: array of { id: number, parent_id: number|null, position: number, category?: string|null }
         $data = $request->validate([
             'items' => ['required','array'],
             'items.*.id' => ['required','integer','exists:posts,id'],
             'items.*.parent_id' => ['nullable','integer','exists:posts,id'],
             'items.*.position' => ['required','integer','min:0'],
+            'items.*.category' => ['nullable','string'],
         ]);
 
         $items = collect($data['items'])->keyBy('id');
@@ -73,11 +75,9 @@ class DocsController extends Controller {
             return $cat;
         };
 
-        // Build category map and basename map
-        $categoryById = [];
+        // Build basename map only (category will be applied from finalized updates)
         $basenameOf = [];
         foreach ($ids as $id) {
-            $categoryById[$id] = $computeCat($id);
             $slug = (string) ($currentSlugs[$id] ?? '');
             $base = $slug !== '' ? preg_replace('#^.*/#', '', $slug) : null;
             if ($base === null || $base === '' || $base === false) {
@@ -86,7 +86,57 @@ class DocsController extends Controller {
             $basenameOf[$id] = $base;
         }
 
-        // Compute new hierarchical slugs using updated parents and inherited categories
+        $updates = $items->map(function ($it, $id) use ($computeCat) {
+            return [
+                'id' => (int) $id,
+                'parent_id' => $it['parent_id'] ?? null,
+                'position' => (int) $it['position'],
+                // If a category is explicitly provided (for roots), use it (normalize empty to null),
+                // otherwise fall back to inherited computeCat
+                'category' => array_key_exists('category', $it)
+                    ? (isset($it['category']) && $it['category'] !== '' ? $it['category'] : null)
+                    : $computeCat($id),
+            ];
+        })->values();
+
+        // Resolve final categories by propagating from (possibly updated) root categories to all descendants
+        $updatesById = $updates->keyBy('id');
+        $resolvedCat = [];
+        $resolving = [];
+        $resolve = function ($id) use (&$resolve, &$resolvedCat, &$resolving, $parentOf, $updatesById, $currentCats) {
+            if (array_key_exists($id, $resolvedCat)) return $resolvedCat[$id];
+            if (isset($resolving[$id])) return $currentCats[$id] ?? null; // cycle guard
+            $resolving[$id] = true;
+            $u = $updatesById->get($id);
+            if (!$u) { $resolvedCat[$id] = null; unset($resolving[$id]); return null; }
+            $pid = $u['parent_id'] ?? null;
+            if ($pid === null) {
+                // Use updated root category if provided; otherwise fall back to current DB value
+                $cat = $u['category'] ?? null;
+                if ($cat === null) $cat = $currentCats[$id] ?? null;
+                $resolvedCat[$id] = $cat;
+            } else {
+                $resolvedCat[$id] = $resolve($pid);
+            }
+            unset($resolving[$id]);
+            return $resolvedCat[$id];
+        };
+        foreach ($ids as $id) {
+            $resolve($id);
+        }
+        // Overwrite categories in $updates with resolved values
+        $updates = $updates->map(function ($u) use ($resolvedCat) {
+            $u['category'] = $resolvedCat[$u['id']] ?? null;
+            return $u;
+        });
+
+        // Build category map from finalized updates for slug computation
+        $categoryById = [];
+        foreach ($updates as $u) {
+            $categoryById[$u['id']] = $u['category'] ?? null;
+        }
+
+        // Compute new hierarchical slugs using updated parents and final categories
         $slugMemo = [];
         $slugComputing = [];
         $computeSlug = function ($id) use (&$computeSlug, &$slugMemo, &$slugComputing, $parentOf, $categoryById, $basenameOf) {
@@ -112,16 +162,7 @@ class DocsController extends Controller {
             return $slugMemo[$id];
         };
 
-        $updates = $items->map(function ($it, $id) use ($computeCat) {
-            return [
-                'id' => (int) $id,
-                'parent_id' => $it['parent_id'] ?? null,
-                'position' => (int) $it['position'],
-                'category' => $computeCat($id),
-            ];
-        })->values();
-
-        // Compute slug updates for all affected ids
+        // Compute slug updates for all affected ids based on the above
         $slugUpdates = [];
         foreach ($ids as $id) {
             $slugUpdates[$id] = $computeSlug($id);

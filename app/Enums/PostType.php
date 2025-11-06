@@ -8,8 +8,8 @@ enum PostType: int {
 
     public static function toArray(): array {
         return [
-            self::DOC => 'Documentation',
-            self::BLOG => 'Blog',
+            self::DOC->value => 'Documentation',
+            self::BLOG->value => 'Blog',
         ];
     }
 }

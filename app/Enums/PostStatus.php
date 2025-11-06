@@ -9,9 +9,9 @@ enum PostStatus: int {
 
     public static function toArray(): array {
         return [
-            self::DRAFT => 'Draft',
-            self::PUBLIC => 'Public',
-            self::PRIVATE => 'Private',
+            self::DRAFT->value => 'Draft',
+            self::PUBLIC->value => 'Public',
+            self::PRIVATE->value => 'Private',
         ];
     }
 }

@@ -37,9 +37,9 @@ export default function Dashboard() {
 
     const statusIcon = (s: number) => {
         switch (s) {
-            case 1: return <Globe className="text-green-600 dark:text-green-500" size={18} aria-label="Public" />;
-            case 2: return <Lock className="text-yellow-600 dark:text-yellow-500" size={18} aria-label="Private"/>;
-            default: return <StickyNote className="text-muted-foreground" size={18} aria-label="Draft"/>;
+            case 1: return <Globe className="size-3 text-green-600 dark:text-green-500" size={18} aria-label="Public" />;
+            case 2: return <Lock className="size-3 text-yellow-600 dark:text-yellow-500" size={18} aria-label="Private"/>;
+            default: return <StickyNote className="size-3 text-muted-foreground" size={18} aria-label="Draft"/>;
         }
     };
 
@@ -102,10 +102,12 @@ export default function Dashboard() {
                             onClick={() => router.visit(`/posts/${p.id}/edit`)}
                             onKeyDown={(e) => { if (e.key === 'Enter') router.visit(`/posts/${p.id}/edit`); }}
                         >
-                            <div className="shrink-0">{statusIcon(p.status)}</div>
                             <div className="shrink-0">{typeIcon(p.type)}</div>
                             <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">{p.title}</div>
+                                <div className="font-medium truncate">
+                                    {p.title}
+                                    <div className="inline-flex ms-2 gap-1.5 text-xs items-center rounded-full bg-muted px-2 py-1 font-medium w-min text-foreground/75">{statusIcon(p.status)} {statuses[p.status]}</div>
+                                    </div>
                                 <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
                             </div>
                             <div className="flex items-center gap-2">

@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import ReactMarkdown from 'react-markdown';
-import { rmComponents, rmRemarkPlugins, rmRehypePlugins } from '@/lib/markdown-react';
+import MdxLivePreview from '@/components/markdown/mdx-live-preview';
+import { mdxComponents, remarkPlugins, getRehypePlugins } from '@/lib/markdown';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -225,15 +225,14 @@ export default function EditPost() {
                     <div className="grow basis-md prose dark:prose-invert px-4">
                         <div className="text-sm text-muted-foreground mt-2 uppercase">
                             <Eye className='inline-flex size-4 mr-1 mb-0.5' />
-                            Live preview (without mdx)
+                            Live preview
                         </div>
-                        <ReactMarkdown
-                            remarkPlugins={rmRemarkPlugins as any}
-                            rehypePlugins={rmRehypePlugins as any}
-                            components={rmComponents}
-                        >
-                            {previewContent}
-                        </ReactMarkdown>
+                        <MdxLivePreview
+                            value={previewContent}
+                            remarkPlugins={remarkPlugins as any}
+                            rehypePlugins={getRehypePlugins() as any}
+                            components={mdxComponents as any}
+                        />
                     </div>
                 </Card>
             </form>

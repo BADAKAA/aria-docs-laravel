@@ -25,6 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cover image endpoints
     Route::post('posts/{post}/cover', [PostController::class, 'updateCover'])->name('posts.cover.update');
     Route::delete('posts/{post}/cover', [PostController::class, 'deleteCover'])->name('posts.cover.delete');
+    // Docs ordering
+    Route::get('order-docs', [\App\Http\Controllers\DocsController::class, 'order'])->name('docs.order');
+    Route::post('order-docs', [\App\Http\Controllers\DocsController::class, 'updateOrder'])->name('docs.order.update');
     Route::get('dashboard', function (\Illuminate\Http\Request $request) {
         $q = trim((string) $request->query('q', ''));
         $type = $request->query('type');

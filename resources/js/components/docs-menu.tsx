@@ -9,6 +9,7 @@ type IndexItem = {
   slug: string; // expects "category/slug"
   category?: string | null;
   parent_id: number | null;
+  position?: number; // used for ordering
 };
 
 function buildTree(items: IndexItem[]) {
@@ -18,9 +19,9 @@ function buildTree(items: IndexItem[]) {
     if (!byParent.has(key)) byParent.set(key, []);
     byParent.get(key)!.push(it);
   });
-  // sort siblings alphabetically by title
+  // sort siblings by position first, then by title as tiebreaker
   for (const list of byParent.values()) {
-    list.sort((a, b) => a.title.localeCompare(b.title));
+    list.sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.title.localeCompare(b.title));
   }
   return {
     childrenOf: (parentId: number | null) => byParent.get(parentId) ?? [],

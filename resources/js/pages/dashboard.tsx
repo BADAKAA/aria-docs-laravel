@@ -111,11 +111,11 @@ export default function Dashboard() {
                                 <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <a className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2' })} href={p.type === 1 ? `/blog/${p.slug}` : `/docs/${p.slug}`} target="_blank" rel="noopener" title="View" onClick={(e) => e.stopPropagation()}>
+                                <a className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 bg-neutral-500/5 hover:bg-neutral-500/7' })} href={p.type === 1 ? `/blog/${p.slug}` : `/docs/${p.slug}`} target="_blank" rel="noopener" title="View" onClick={(e) => e.stopPropagation()}>
                                     <Eye size={16} />
                                 </a>
                                 <button
-                                    className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 text-destructive hover:text-destructive' })}
+                                    className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 text-destructive hover:text-destructive bg-red-500/5 hover:bg-red-500/7' })}
                                     title="Delete"
                                     onClick={(e) => {
                                         e.stopPropagation();

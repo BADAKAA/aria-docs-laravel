@@ -5,7 +5,7 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { buttonVariants } from '@/components/ui/button';
-import { Eye, FileText, Globe, Lock, StickyNote, Trash2 } from 'lucide-react';
+import { Eye, FileText, Globe, Lock, StickyNote, Trash2, UserPlus, UserX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Pagination from '@/components/pagination';
 
@@ -22,6 +22,7 @@ export default function Dashboard() {
     const types = page.types as Record<string, string>;
     const statuses = page.statuses as Record<string, string>;
     const filters = page.filters as { q?: string; type?: string; status?: string };
+    const registrationClosed = !!page.registrationClosed;
 
     const [q, setQ] = useState(filters.q ?? '');
     const [type, setType] = useState<string>((filters.type ?? '') !== '' ? String(filters.type) : 'all');
@@ -86,6 +87,16 @@ export default function Dashboard() {
                             </SelectGroup>
                         </SelectContent>
                     </Select>
+                    <div className="ml-auto flex items-center gap-2">
+                        <button
+                            className={buttonVariants({ variant: registrationClosed ? 'secondary' : 'default' })}
+                            title={registrationClosed ? 'Open registration' : 'Close registration'}
+                            onClick={() => router.post('/admin/toggle-registration')}
+                        >
+                            {registrationClosed ? <UserPlus className="mr-2 h-4 w-4"/> : <UserX className="mr-2 h-4 w-4"/>}
+                            {registrationClosed ? 'Open registration' : 'Close registration'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* List */}

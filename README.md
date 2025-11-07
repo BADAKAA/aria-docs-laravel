@@ -7,6 +7,7 @@ This project is an extension of the [AriaDocs](https://github.com/nisabmohd/Aria
 - Markdown editor with live preview
 - Drag-and-drop interface to order and categorise the documentation
 - integrated search
+- button to prevent future registration
 
 
 ## Project Setup

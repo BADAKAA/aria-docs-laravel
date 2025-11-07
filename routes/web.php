@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DocsController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -21,6 +22,7 @@ Route::get('docs', [DocsController::class, 'index'])->name('docs.index');
 Route::get('/search', [PostController::class, 'search'])->name('search.index');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('admin/toggle-registration', [AdminController::class, 'toggleRegistration'])->name('admin.toggle.registration');
     Route::resource('posts', PostController::class);
     // Cover image endpoints
     Route::post('posts/{post}/cover', [PostController::class, 'updateCover'])->name('posts.cover.update');
@@ -61,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 'type' => $type,
                 'status' => $status,
             ],
+            'registrationClosed' => file_exists(storage_path('framework/registration-closed')),
         ]);
     })->name('dashboard');
 });

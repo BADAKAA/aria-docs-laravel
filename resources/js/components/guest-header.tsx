@@ -1,9 +1,9 @@
-import { Edit, Github, Search, Menu, LogIn } from "lucide-react";
+import { Edit, Github, Search, Menu, LayoutGrid } from "lucide-react";
 import AppLogo from "./app-logo";
 import AppearanceToggleDropdown from "./appearance-dropdown";
 import { Link, usePage } from "@inertiajs/react";
 import { SharedData } from "@/types";
-import { dashboard, login, register } from "@/routes";
+import { dashboard } from "@/routes";
 import { Button } from "./ui/button";
 import { index as blogIndex } from "@/routes/blog";
 import { index as docsIndex } from "@/routes/docs";
@@ -12,12 +12,7 @@ import SearchModal from "./search-modal";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import DocsMenu from "@/components/docs-menu";
 
-export function Header({
-  canRegister = true,
-}: {
-  canRegister?: boolean;
-}) {
-
+export function Header() {
   const auth = usePage<SharedData>().props.auth;
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
   const [searchOpen, setSearchOpen] = useState(false);
@@ -60,7 +55,7 @@ export function Header({
                   {navLinks.map((l) => (
                     <SheetClose asChild key={l.title + l.href}>
                       <Link prefetch
-                        className={`hover:text-foreground ${l.isActive ? 'font-semibold text-foreground' : ''}`}
+                        className={`hover:text-foreground ${l.isActive ? ' text-foreground' : ''}`}
                         href={l.href}
                       >
                         {l.title}
@@ -79,7 +74,7 @@ export function Header({
             <div className="lg:flex hidden">
               <AppLogo />
             </div>
-            <div className="md:flex hidden items-center gap-4 text-sm font-medium text-muted-foreground">
+            <div className="md:flex hidden items-center gap-4 text-sm dark:text-stone-300/85 text-stone-800">
               {navLinks.map((l) => (
                 <a
                   key={l.title + l.href}
@@ -113,7 +108,7 @@ export function Header({
           <div className="flex items-center justify-between sm:gap-2">
             <Link href={dashboard()}>
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
-                <Edit className="size-4" />
+                {auth ? <LayoutGrid className="size-4" />: <Edit className="size-4" />}
               </Button>
             </Link>
             <Link href="https://github.com/BADAKAA/aria-docs-laravel" >

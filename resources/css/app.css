@@ -73,12 +73,12 @@
 
 :root {
     --background: oklch(1 0 0);
-    --foreground: oklch(0.37 0.01 285.89);
+    --foreground: oklch(26.448% 0 271.152);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: oklch(32.504% 0.00004 271.152);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -160,8 +160,11 @@
   margin: 0 !important;
 }
 
+h1 {
+  @apply tracking-tight;
+}
 h1, h2, h3, h4, h5, h6 {
-  color: var(--color-headings);
+  @apply tracking-normal text-headings;
   scroll-margin: calc(var(--spacing) * 18);
 }
 

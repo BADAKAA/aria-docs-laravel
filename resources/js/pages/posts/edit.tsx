@@ -217,13 +217,13 @@ export default function EditPost() {
                     </div>
                 </div>
                 <Label htmlFor="content">Content (Markdown/MDX)</Label>
-                <Card className="flex gap-0 flex-col lg:flex-row p-0 justify-stretch">
-                    <div className='grow basis-md -m-px'>
-                        <Textarea id="content" value={data.content} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('content', e.target.value)} rows={20} className='font-mono bg-muted lg:rounded-r-none' />
+                <Card className="grid grid-cols-1 lg:grid-cols-2 !gap-0 !p-0 justify-stretch">
+                    <div className='-m-px'>
+                        <Textarea id="content" value={data.content} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('content', e.target.value)} rows={20} className='font-mono bg-muted lg:rounded-r-none lg:min-h-full' />
                         {errors.content && <p className="text-xs  text-destructive mt-1">{errors.content}</p>}
                     </div>
-                    <div className="grow basis-md prose dark:prose-invert px-4">
-                        <div className="text-sm text-muted-foreground mt-2 uppercase">
+                    <div className="prose dark:prose-invert px-4 pb-4">
+                        <div className="text-sm text-muted-foreground mt-2 mb-1 uppercase">
                             <Eye className='inline-flex size-4 mr-1 mb-0.5' />
                             Live preview
                         </div>

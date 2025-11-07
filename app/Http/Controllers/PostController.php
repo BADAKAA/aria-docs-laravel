@@ -63,7 +63,6 @@ class PostController extends Controller {
             'cover' => ['nullable', 'image', 'max:5120'], // 5MB
             'remove_cover' => ['nullable', 'boolean'],
         ]);
-        dd($validated['content_html']);
 
         $post->fill([
             'title' => $validated['title'],

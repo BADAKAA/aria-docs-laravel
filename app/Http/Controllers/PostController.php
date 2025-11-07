@@ -57,17 +57,20 @@ class PostController extends Controller {
             'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'category' => ['nullable', 'string', 'max:255'],
+            'content_html' => ['nullable', 'string'],
             'type' => ['required', 'integer', Rule::in([PostType::DOC->value, PostType::BLOG->value])],
             'status' => ['required', 'integer', Rule::in([PostStatus::DRAFT->value, PostStatus::PUBLIC->value, PostStatus::PRIVATE->value])],
             'cover' => ['nullable', 'image', 'max:5120'], // 5MB
             'remove_cover' => ['nullable', 'boolean'],
         ]);
+        dd($validated['content_html']);
 
         $post->fill([
             'title' => $validated['title'],
             'slug' => $validated['slug'],
             'summary' => $validated['summary'] ?? null,
             'content' => $validated['content'] ?? null,
+            'content_html' => $validated['content_html'] ?? null,
             'category' => $validated['category'] ?? null,
             'type' => $validated['type'],
             'status' => $validated['status'],

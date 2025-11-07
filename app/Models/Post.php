@@ -25,6 +25,7 @@ class Post extends Model {
         'category',
         'position',
         'content',
+        'content_html',
         'cover_path',
         'published_at',
     ];

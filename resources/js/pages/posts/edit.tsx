@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import MdxLivePreview from '@/components/markdown/mdx-live-preview';
-import { mdxComponents, remarkPlugins, getRehypePlugins } from '@/lib/markdown';
+import { mdxComponents, mdxRemarkPlugins, getMdxRehypePlugins } from '@/lib/mdx';
+import { renderMdxToHtml } from '@/lib/mdx-render';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -31,6 +32,7 @@ export default function EditPost() {
         slug: post.slug || '',
         summary: post.summary || '',
         content: post.content || '',
+        content_html: (post as any).content_html || '',
         type: post.type as unknown as number,
         status: post.status as unknown as number,
         category: (post as any).category || '',
@@ -43,6 +45,7 @@ export default function EditPost() {
         slug: string;
         summary: string;
         content: string;
+        content_html?: string;
         type: number;
         status: number;
         category: string;
@@ -50,9 +53,16 @@ export default function EditPost() {
         remove_cover: boolean;
     }
 
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        transform((form) => form);
+        // Precompute HTML snapshot on the client using React MDX
+        try {
+            const html = await renderMdxToHtml(data.content || '');
+            setData('content_html', html);
+        } catch (err) {
+            console.error('MDX render failed', err);
+            // continue without content_html
+        }
         // Force POST with method spoofing so PHP parses multipart body
         transform((form) => ({ ...(form as any), _method: 'put' }));
         submit(`/posts/${post.id}` as string, {
@@ -229,8 +239,8 @@ export default function EditPost() {
                         </div>
                         <MdxLivePreview
                             value={previewContent}
-                            remarkPlugins={remarkPlugins as any}
-                            rehypePlugins={getRehypePlugins() as any}
+                            remarkPlugins={mdxRemarkPlugins as any}
+                            rehypePlugins={getMdxRehypePlugins() as any}
                             components={mdxComponents as any}
                         />
                     </div>

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('position')->nullable();
             $table->string('cover_path')->nullable();
             $table->longText('content');
+            $table->longText('content_html')->nullable();
             $table->dateTime('published_at')->nullable();
             $table->timestamps();
         });

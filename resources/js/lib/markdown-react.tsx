@@ -121,3 +121,19 @@ export function extractTocFromMarkdown(rawMd: string): TocItem[] {
   }
   return items;
 }
+
+// Preferred for read views: build TOC from precomputed HTML instead of markdown
+export function extractTocFromHtml(html: string): TocItem[] {
+  if (!html) return [];
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  const nodes = container.querySelectorAll('h2, h3, h4');
+  const items: TocItem[] = [];
+  nodes.forEach((el) => {
+    const level = Number(el.tagName[1]); // 'H2' -> 2
+    const text = (el.textContent || '').trim();
+    const id = (el as HTMLElement).id || sluggify(text);
+    if (text) items.push({ level, text, href: `#${id}` });
+  });
+  return items;
+}

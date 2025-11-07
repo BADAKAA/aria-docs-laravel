@@ -55,6 +55,7 @@ export interface Post {
     position?: number;
     parent_id?: number | null;
     content: string;
+    content_html?: string | null;
     category?: string;
     published_at: string;
     created_at: string;

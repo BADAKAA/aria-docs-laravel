@@ -1,21 +1,22 @@
 import GuestLayout from '@/layouts/guest-layout';
 import { Post } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { MDXProviderWrapper, loadAllDocs, getPreviousNext } from '@/lib/markdown';
 import { Typography } from '@/components/typography';
 import { Leftbar } from '@/components/leftbar';
 import Toc from '@/components/toc';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { extractTocFromMarkdown } from '@/lib/markdown-react';
+import { extractTocFromHtml } from '@/lib/markdown-react';
 import { ucfirst } from '@/lib/utils';
 import DocsPagination from '@/components/docs-pagination';
-import { Edit, Pencil } from 'lucide-react';
+import { Edit } from 'lucide-react';
+// Compute prev/next from DB-provided index list
 
 
 export default function Documentation() {
     const page = usePage().props as any;
     const post = page.post as Post;
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
+    const index = (page.index || []) as Array<{ id:number; title:string; slug:string; category?:string|null; parent_id:number|null; position?:number }>;
     const parents = post.slug.split('/').map(part => ({
         title: ucfirst(part.replaceAll('-', ' ')),
         href: '/docs/' + (post.slug?.split('/').slice(0, post.slug!.split('/').indexOf(part) + 1).join('/') ?? ''),
@@ -32,13 +33,31 @@ export default function Documentation() {
     }
     ]
 
-    const tocItems = extractTocFromMarkdown(post.content || '');
+    const tocItems = extractTocFromHtml(post.content_html || '');
 
-    // Resolve MDX component by slug using eager MDX modules for SSR
-    const docs = loadAllDocs();
-    const currentDoc = docs.find(d => d.slug === post.slug);
-
-    const { prev, next } = getPreviousNext(post.slug);
+    // Build ordered DFS list from index (position, then title)
+    const byParent = new Map<number|null, typeof index>();
+    for (const it of index) {
+        const list = byParent.get(it.parent_id) || [];
+        list.push(it);
+        byParent.set(it.parent_id, list);
+    }
+    for (const [k, list] of byParent) {
+        list.sort((a,b) => (a.position ?? 0) - (b.position ?? 0) || a.title.localeCompare(b.title));
+        byParent.set(k, list);
+    }
+    const order: typeof index = [];
+    const walk = (pid: number|null) => {
+        const children = byParent.get(pid) || [];
+        for (const c of children) {
+            order.push(c);
+            walk(c.id);
+        }
+    };
+    walk(null);
+    const currentIdx = order.findIndex(it => it.slug === post.slug);
+    const prev = currentIdx > 0 ? { title: order[currentIdx - 1].title, href: `/${order[currentIdx - 1].slug}` } : undefined;
+    const next = currentIdx >= 0 && currentIdx < order.length - 1 ? { title: order[currentIdx + 1].title, href: `/${order[currentIdx + 1].slug}` } : undefined;
 
     return (
         <GuestLayout>
@@ -65,13 +84,8 @@ export default function Documentation() {
                                     <p className="mb-4 text-muted-foreground sm:text-[16.5px] text-[14.5px]">{post.summary}</p>
                                 )}
                                 <div>
-                                    {currentDoc ? (
-                                        <MDXProviderWrapper>
-                                            <currentDoc.Component />
-                                        </MDXProviderWrapper>
-                                    ) : post.content ? (
-                                        // Fallback to markdown renderer if no MDX module matched
-                                        <div className="prose dark:prose-invert">{post.content}</div>
+                                    {post.content_html ? (
+                                        <div className="prose dark:prose-invert" dangerouslySetInnerHTML={{ __html: post.content_html }} />
                                     ) : (
                                         <p className="mt-6 text-muted-foreground">No content.</p>
                                     )}

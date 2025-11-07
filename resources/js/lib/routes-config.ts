@@ -63,3 +63,14 @@ function getRecurrsiveAllLinks(node: EachRoute) {
 }
 
 export const page_routes = ROUTES.map((it) => getRecurrsiveAllLinks(it)).flat();
+
+export function getPreviousNext(path: string) {
+  // normalize to match page_routes hrefs (no leading '/docs')
+  let normalized = path.replace(/^\/+|\/+$/g, '');
+  normalized = normalized.replace(/^(?:docs\/+)+/, '');
+  const index = page_routes.findIndex(({ href }) => href === `/${normalized}`);
+  return {
+    prev: index > 0 ? page_routes[index - 1] : undefined,
+    next: index >= 0 && index < page_routes.length - 1 ? page_routes[index + 1] : undefined,
+  };
+}

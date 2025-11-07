@@ -16,12 +16,15 @@ class DocsController extends Controller {
     }
 
     public function show(string $slug) {
-        $post = Post::where('slug', $slug)->ofType(PostType::DOC)->public()->with(['author'])->firstOrFail();
+    $post = Post::where('slug', $slug)->ofType(PostType::DOC)->public()->with(['author'])->firstOrFail();
         $index = Post::ofType(PostType::DOC)
             ->public()
             ->where(fn($query) => $query->where('category', $post->category)->orWhereNull('parent_id'))
             ->get(['id', 'title', 'slug', 'category', 'parent_id', 'position']);
-        return Inertia::render('documentation', compact('post', 'index'));
+        return Inertia::render('documentation', [
+            'post' => $post,
+            'index' => $index,
+        ]);
     }
 
     public function order() {

@@ -2,9 +2,6 @@ import GuestLayout from '@/layouts/guest-layout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Post } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import ReactMarkdown from 'react-markdown';
-import { rmComponents, rmRemarkPlugins, rmRehypePlugins } from '@/lib/markdown-react';
-import { MDXProviderWrapper, loadAllBlogs } from '@/lib/markdown';
 import { buttonVariants } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -14,8 +11,7 @@ export default function BlogShow() {
     const page = usePage().props as any;
     const post = page.post as Post;
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
-    const blogs = loadAllBlogs();
-    const mdxBlog = blogs.find(b => b.slug === post.slug);
+    // All blog content is rendered from database markdown; no MDX files
     return (
         <GuestLayout>
             <Head title={post.title} />
@@ -79,18 +75,8 @@ export default function BlogShow() {
                 {/* Content */}
                 <article className="prose dark:prose-invert max-w-none markdown">
                     <Typography>
-                        {mdxBlog ? (
-                            <MDXProviderWrapper>
-                                <mdxBlog.Component />
-                            </MDXProviderWrapper>
-                        ) : post.content ? (
-                            <ReactMarkdown
-                                remarkPlugins={rmRemarkPlugins as any}
-                                rehypePlugins={rmRehypePlugins as any}
-                                components={rmComponents}
-                            >
-                                {post.content}
-                            </ReactMarkdown>
+                        {post.content_html ? (
+                            <div dangerouslySetInnerHTML={{ __html: post.content_html }} />
                         ) : (
                             <p className="mt-6 text-muted-foreground">No content.</p>
                         )}

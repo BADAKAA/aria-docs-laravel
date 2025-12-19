@@ -11,7 +11,6 @@ export default function BlogShow() {
     const page = usePage().props as any;
     const post = page.post as Post;
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
-    // All blog content is rendered from database markdown; no MDX files
     return (
         <GuestLayout>
             <Head title={post.title} />

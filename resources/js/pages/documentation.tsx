@@ -10,7 +10,7 @@ import { extractTocFromHtml } from '@/lib/markdown-react';
 import { ucfirst } from '@/lib/utils';
 import DocsPagination from '@/components/docs-pagination';
 import { Edit } from 'lucide-react';
-import BlockRenderer from '@/blocks/BlockRenderer';
+import ReadOnlyBlockNote from '@/blocks/BlockRenderer';
 import { setSanitizedHTML } from '@/utils/sanitize';
 // Compute prev/next from DB-provided index list
 
@@ -98,7 +98,7 @@ export default function Documentation() {
                                 )}
                                 <div>
                                     {Array.isArray(blocks) && blocks.length > 0 ? (
-                                        blocks.map((block, idx) => <BlockRenderer key={idx} block={block} />)
+                                        <ReadOnlyBlockNote blocks={blocks} />
                                     ) : post.content_html ? (
                                         <div ref={contentRef} className="prose dark:prose-invert" />
                                     ) : (

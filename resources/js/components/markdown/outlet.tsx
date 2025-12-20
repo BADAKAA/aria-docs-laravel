@@ -1,4 +1,4 @@
-import { BaseMdxFrontmatter, getAllChilds } from "../../lib/markdown";
+import { getAllChilds } from "../../lib/routes-config";
 import { Link } from '@inertiajs/react';
 
 export default function Outlet({ path }: { path: string }) {
@@ -14,7 +14,7 @@ export default function Outlet({ path }: { path: string }) {
   );
 }
 
-type ChildCardProps = BaseMdxFrontmatter & { href: string };
+type ChildCardProps = { title: string; href: string; description?: string };
 
 function ChildCard({ description, href, title }: ChildCardProps) {
   return (

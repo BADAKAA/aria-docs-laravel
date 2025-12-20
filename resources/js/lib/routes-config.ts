@@ -74,3 +74,26 @@ export function getPreviousNext(path: string) {
     next: index >= 0 && index < page_routes.length - 1 ? page_routes[index + 1] : undefined,
   };
 }
+
+// Return direct children under a route path like "/getting-started/components"
+export function getAllChilds(path: string) {
+  const parts = path.replace(/^\/+|\/+$/g, '').split('/');
+  // Traverse ROUTES tree
+  let nodeList: EachRoute[] = ROUTES;
+  let current: EachRoute | undefined;
+  for (const part of parts) {
+    current = nodeList.find((n) => n.href.replace(/^\/+/, '') === part);
+    if (!current) return [];
+    nodeList = (current.items || []).map((sub) => ({
+      ...sub,
+      href: `${current!.href}${sub.href}`,
+    }));
+  }
+  // If path points to a leaf, return its children; else return normalized list
+  const items = current?.items || [];
+  return items.map((sub) => ({
+    title: sub.title,
+    href: `${current!.href}${sub.href}`,
+    description: undefined as string | undefined,
+  }));
+}

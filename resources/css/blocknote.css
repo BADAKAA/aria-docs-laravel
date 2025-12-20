@@ -1,0 +1,11 @@
+/* Override BlockNote font to use site default */
+.bn-container {
+  --bn-font-family: inherit;
+  font-family: inherit !important;
+}
+.bn-default-styles {
+  font-family: inherit !important;
+}
+.blocknote-readonly .bn-editor {
+    padding: 0 !important;
+}

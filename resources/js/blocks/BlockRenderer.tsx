@@ -1,5 +1,6 @@
 import React from 'react';
-import { BlockNoteViewRaw as BlockNoteView, useCreateBlockNote } from '@blocknote/react';
+import { BlockNoteView } from '@blocknote/mantine';
+import { useCreateBlockNote } from '@blocknote/react';
 import '@blocknote/mantine/style.css';
 import { createDocsBlockNoteSchema } from '@/blocks/blocknote-schema';
 

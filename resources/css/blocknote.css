@@ -9,3 +9,45 @@
 .blocknote-readonly .bn-editor {
     padding: 0 !important;
 }
+
+/* REMOVE DOWNLOAD ICON */
+/* Read-only: remove outlines/focus rings and hide formatting UI */
+.blocknote-readonly *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.blocknote-readonly [data-selected="true"],
+.blocknote-readonly [data-hovered="true"],
+.blocknote-readonly .bn-block:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+/* Hide any formatting toolbar/popovers in read-only */
+.blocknote-readonly .bn-formatting-toolbar,
+.blocknote-readonly .mantine-Popover-dropdown,
+.blocknote-readonly .bn-popover,
+.blocknote-readonly [data-blocknote-formatting-toolbar] {
+  display: none !important;
+}
+
+/* Image block: prevent click/drag and remove visual outline */
+.blocknote-readonly [data-block-type="image"] {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.blocknote-readonly [data-block-type="image"] img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* REMOVE IMG MARGIN */
+.blocknote-readonly .bn-visual-media {
+  margin-block: 0;
+}
+/* REMOVE IMG OUTLINE */
+.blocknote-readonly .bn-block-content.ProseMirror-selectednode>*, .blocknote-readonly .ProseMirror-selectednode>.bn-block-content>* {
+  outline: none;
+}

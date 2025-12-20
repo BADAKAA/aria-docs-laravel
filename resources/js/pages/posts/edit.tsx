@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import MdxLivePreview from '@/components/markdown/mdx-live-preview';
-import { mdxComponents, mdxRemarkPlugins, getMdxRehypePlugins } from '@/lib/mdx';
-import { renderMdxToHtml } from '@/lib/mdx-render';
+import TiptapEditor from '@/components/markdown/tiptap-editor';
+import { renderMarkdownToHtml } from '@/lib/markdown-render';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -55,12 +54,12 @@ export default function EditPost() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Precompute HTML snapshot on the client using React MDX
+        // Precompute HTML snapshot on the client using Markdown renderer
         try {
-            const html = await renderMdxToHtml(data.content || '');
+            const html = await renderMarkdownToHtml(data.content || '');
             setData('content_html', html);
         } catch (err) {
-            console.error('MDX render failed', err);
+            console.error('Markdown render failed', err);
             // continue without content_html
         }
         // Force POST with method spoofing so PHP parses multipart body
@@ -113,12 +112,7 @@ export default function EditPost() {
         setCoverPreview(post.cover_url ?? null);
     }, [post.cover_url]);
 
-    // Debounced content for live preview
-    const [previewContent, setPreviewContent] = useState<string>(data.content || '');
-    useEffect(() => {
-        const t = setTimeout(() => setPreviewContent(data.content || ''), 200);
-        return () => clearTimeout(t);
-    }, [data.content]);
+    // Live preview is not needed; Tiptap shows formatting inline
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -226,23 +220,11 @@ export default function EditPost() {
                         </Card>
                     </div>
                 </div>
-                <Label htmlFor="content">Content (Markdown/MDX)</Label>
-                <Card className="grid grid-cols-1 lg:grid-cols-2 !gap-0 !p-0 justify-stretch">
+                <Label htmlFor="content">Content</Label>
+                <Card className="!gap-0 !p-0">
                     <div className='-m-px'>
-                        <Textarea id="content" value={data.content} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('content', e.target.value)} rows={20} className='font-mono bg-muted lg:rounded-r-none lg:min-h-full' />
-                        {errors.content && <p className="text-xs  text-destructive mt-1">{errors.content}</p>}
-                    </div>
-                    <div className="prose dark:prose-invert px-4 pb-4">
-                        <div className="text-sm text-muted-foreground mt-2 mb-1 uppercase">
-                            <Eye className='inline-flex size-4 mr-1 mb-0.5' />
-                            Live preview
-                        </div>
-                        <MdxLivePreview
-                            value={previewContent}
-                            remarkPlugins={mdxRemarkPlugins as any}
-                            rehypePlugins={getMdxRehypePlugins() as any}
-                            components={mdxComponents as any}
-                        />
+                        <TiptapEditor value={data.content} onChange={(md) => setData('content', md)} className='lg:min-h-full' />
+                        {errors.content && <p className="text-xs text-destructive mt-1">{errors.content}</p>}
                     </div>
                 </Card>
             </form>

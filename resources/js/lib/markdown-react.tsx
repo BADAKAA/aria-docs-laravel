@@ -88,8 +88,8 @@ export const rmComponents: Components = {
   td: ({ node, ...props }) => <td {...props} />,
 };
 
-export const rmRemarkPlugins = [remarkGfm];
-export const rmRehypePlugins = [
+export const rmRemarkPlugins: any = [remarkGfm];
+export const rmRehypePlugins: any = [
   preProcess,
   rehypeCodeTitles,
   rehypeCodeTitlesWithLogo,

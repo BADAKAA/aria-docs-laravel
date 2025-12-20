@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './syntax.css';
+@import './tiptap.css';
 
 @import "tw-animate-css";
 

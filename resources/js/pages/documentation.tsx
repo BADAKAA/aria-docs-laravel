@@ -1,3 +1,4 @@
+import React, { useEffect, useRef } from 'react';
 import GuestLayout from '@/layouts/guest-layout';
 import { Post } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -9,12 +10,16 @@ import { extractTocFromHtml } from '@/lib/markdown-react';
 import { ucfirst } from '@/lib/utils';
 import DocsPagination from '@/components/docs-pagination';
 import { Edit } from 'lucide-react';
+import BlockRenderer from '@/blocks/BlockRenderer';
+import { setSanitizedHTML } from '@/utils/sanitize';
 // Compute prev/next from DB-provided index list
 
 
 export default function Documentation() {
     const page = usePage().props as any;
     const post = page.post as Post;
+    const blocks = JSON.parse((post as any)?.content) as Array<{ type: string; props?: any }> | undefined;
+    const contentRef = useRef<HTMLDivElement | null>(null);
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
     const index = (page.index || []) as Array<{ id:number; title:string; slug:string; category?:string|null; parent_id:number|null; position?:number }>;
     const parents = post.slug.split('/').map(part => ({
@@ -34,6 +39,12 @@ export default function Documentation() {
     ]
 
     const tocItems = extractTocFromHtml(post.content_html || '');
+
+    useEffect(() => {
+        if (!Array.isArray(blocks) || blocks.length === 0) {
+            setSanitizedHTML(contentRef.current, post.content_html || '');
+        }
+    }, [post?.content_html, blocks]);
 
     // Build ordered DFS list from index (position, then title)
     const byParent = new Map<number|null, typeof index>();
@@ -58,6 +69,8 @@ export default function Documentation() {
     const currentIdx = order.findIndex(it => it.slug === post.slug);
     const prev = currentIdx > 0 ? { title: order[currentIdx - 1].title, href: `/${order[currentIdx - 1].slug}` } : undefined;
     const next = currentIdx >= 0 && currentIdx < order.length - 1 ? { title: order[currentIdx + 1].title, href: `/${order[currentIdx + 1].slug}` } : undefined;
+    console.log(blocks);
+    
 
     return (
         <GuestLayout>
@@ -84,8 +97,10 @@ export default function Documentation() {
                                     <p className="mb-4 text-muted-foreground sm:text-[16.5px] text-[14.5px]">{post.summary}</p>
                                 )}
                                 <div>
-                                    {post.content_html ? (
-                                        <div className="prose dark:prose-invert" dangerouslySetInnerHTML={{ __html: post.content_html }} />
+                                    {Array.isArray(blocks) && blocks.length > 0 ? (
+                                        blocks.map((block, idx) => <BlockRenderer key={idx} block={block} />)
+                                    ) : post.content_html ? (
+                                        <div ref={contentRef} className="prose dark:prose-invert" />
                                     ) : (
                                         <p className="mt-6 text-muted-foreground">No content.</p>
                                     )}

@@ -32,6 +32,12 @@ class Post extends Model {
 
     protected $appends = ['cover_url'];
 
+    protected $casts = [
+        'published_at' => 'datetime',
+        // When present in the schema, cast blocks JSON to array for Inertia serialization
+        'blocks' => 'array',
+    ];
+
     public function author() {
         return $this->belongsTo(User::class, 'author_id');
     }

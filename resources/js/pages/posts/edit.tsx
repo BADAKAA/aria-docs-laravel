@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import TiptapEditor from '@/components/markdown/tiptap-editor';
-import { renderMarkdownToHtml } from '@/lib/markdown-render';
 import { Eye, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -54,14 +53,7 @@ export default function EditPost() {
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Precompute HTML snapshot on the client using Markdown renderer
-        try {
-            const html = await renderMarkdownToHtml(data.content || '');
-            setData('content_html', html);
-        } catch (err) {
-            console.error('Markdown render failed', err);
-            // continue without content_html
-        }
+        // HTML snapshot is kept in sync by the editor via onChangeHtml
         // Force POST with method spoofing so PHP parses multipart body
         transform((form) => ({ ...(form as any), _method: 'put' }));
         submit(`/posts/${post.id}` as string, {
@@ -223,7 +215,11 @@ export default function EditPost() {
                 <Label htmlFor="content">Content</Label>
                 <Card className="!gap-0 !p-0">
                     <div className='-m-px'>
-                        <TiptapEditor value={data.content} onChange={(md) => setData('content', md)} className='lg:min-h-full' />
+                        <TiptapEditor
+                            value={data.content}
+                            onChange={(json) => setData('content', json)}
+                            className='lg:min-h-full'
+                        />
                         {errors.content && <p className="text-xs text-destructive mt-1">{errors.content}</p>}
                     </div>
                 </Card>

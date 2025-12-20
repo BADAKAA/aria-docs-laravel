@@ -6,6 +6,7 @@ use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -58,13 +59,15 @@ class PostController extends Controller {
             'content' => ['nullable', 'string'],
             'category' => ['nullable', 'string', 'max:255'],
             'content_html' => ['nullable', 'string'],
+            // Optional BlockNote blocks payload; stored when schema has a JSON 'blocks' column
+            'blocks' => ['nullable', 'array'],
             'type' => ['required', 'integer', Rule::in([PostType::DOC->value, PostType::BLOG->value])],
             'status' => ['required', 'integer', Rule::in([PostStatus::DRAFT->value, PostStatus::PUBLIC->value, PostStatus::PRIVATE->value])],
             'cover' => ['nullable', 'image', 'max:5120'], // 5MB
             'remove_cover' => ['nullable', 'boolean'],
         ]);
 
-        $post->fill([
+        $data = [
             'title' => $validated['title'],
             'slug' => $validated['slug'],
             'summary' => $validated['summary'] ?? null,
@@ -73,7 +76,14 @@ class PostController extends Controller {
             'category' => $validated['category'] ?? null,
             'type' => $validated['type'],
             'status' => $validated['status'],
-        ])->save();
+        ];
+
+        // Only persist blocks when the 'blocks' column exists; avoid DB errors otherwise
+        if (Schema::hasColumn('posts', 'blocks') && array_key_exists('blocks', $validated)) {
+            $data['blocks'] = $validated['blocks'];
+        }
+
+        $post->fill($data)->save();
 
 
         if ($request->hasFile('cover')) {

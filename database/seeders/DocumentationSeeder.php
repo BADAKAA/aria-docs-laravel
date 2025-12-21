@@ -163,28 +163,6 @@ class DocumentationSeeder extends Seeder
     }
 
     /**
-     * Convert a Markdown file to ProseMirror-style JSON using a Node script.
-     * Returns JSON string on success, or null on failure.
-     */
-    private function convertMarkdownToJson(string $filePath): ?string
-    {
-        try {
-            $script = base_path('scripts/md-to-prosemirror.js');
-            if (!is_file($script)) return null;
-            $cmd = 'node ' . escapeshellarg($script) . ' ' . escapeshellarg($filePath);
-            // shell_exec returns null on failure
-            $out = @shell_exec($cmd);
-            if (!is_string($out)) return null;
-            $json = trim($out);
-            // Basic sanity check: must start with '{' and contain "type":"doc"
-            if ($json === '') return null;
-            return $json;
-        } catch (\Throwable $e) {
-            return null;
-        }
-    }
-
-    /**
      * Recursively list all index.md files under a directory.
      * @return array<int,string>
      */

@@ -270,3 +270,7 @@ pre>code {
 td>code {
   word-break: keep-all !important;
 }
+
+.editor-sidebar > * {
+  @apply p-4;
+}

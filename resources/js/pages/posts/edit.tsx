@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import TiptapEditor from '@/components/markdown/tiptap-editor';
-import { Eye, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Eye, Save, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import CoverUploader from './partials/CoverUploader';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -62,46 +63,9 @@ export default function EditPost() {
         } as any);
     };
 
-    // Cover form state (separate Inertia form for CSRF + redirects)
-    const [coverFile, setCoverFile] = useState<File | null>(null);
-    const [coverPreview, setCoverPreview] = useState<string | null>(post.cover_url ?? null);
-    const { data: coverData, setData: setCoverData, post: postCover, delete: destroyCover, processing: coverProcessing } = useForm<{ cover: File | null }>({ cover: null });
-
-    const onCoverChange = (file: File | null) => {
-        setCoverFile(file);
-        setCoverData('cover', file);
-        if (file) {
-            const url = URL.createObjectURL(file);
-            setCoverPreview(url);
-        } else {
-            setCoverPreview(post.cover_url ?? null);
-        }
-    };
-
-    const onCoverDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const file = e.dataTransfer.files?.[0] ?? null;
-        if (file && file.type.startsWith('image/')) onCoverChange(file);
-    };
-    const onCoverDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const submitCover = () => {
-        if (!coverFile) return;
-        postCover(`/posts/${post.id}/cover`, { forceFormData: true, onFinish: () => setCoverFile(null) } as any);
-    };
-
-    const deleteCover = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        destroyCover(`/posts/${post.id}/cover`, { onSuccess: () => setCoverPreview(null) } as any);
-    };
-
     // Sync preview from server after Inertia navigation/redirect
     useEffect(() => {
-        setCoverPreview(post.cover_url ?? null);
+        // No-op: `CoverUploader` handles its own preview sync via props
     }, [post.cover_url]);
 
     // Live preview is not needed; Tiptap shows formatting inline
@@ -109,120 +73,88 @@ export default function EditPost() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Post" />
-            <form onSubmit={onSubmit} className="space-y-6 p-4">
-                <div className="flex flex-wrap gap-4">
-                    <Card className="grow basis-lg p-4 lg:col-span-2">
-                        <div className="flex gap-4 flex-wrap">
-                            <div className='grow basis-xs'>
-                                <Label>Type</Label>
-                                <Select value={String(data.type)} onValueChange={(v) => setData('type', Number(v))}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            {Object.entries(types).map(([key, label]) => (
-                                                <SelectItem key={key} value={String(key)}>{label}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className='grow basis-xs'>
-                                <Label htmlFor="category">Category</Label>
-                                <Input id="category" value={data.category} onChange={(e) => setData('category', e.target.value)} aria-invalid={!!errors.category} />
-                                {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
-                            </div>
-                            <div className='grow basis-xs'>
-                                <Label>Status</Label>
-                                <Select value={String(data.status)} onValueChange={(v) => setData('status', Number(v))}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            {Object.entries(statuses).map(([key, label]) => (
-                                                <SelectItem key={key} value={String(key)}>{label}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className="flex gap-4 flex-wrap">
-                            <div className='grow basis-xs'>
-                                <Label htmlFor="title">Title</Label>
-                                <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} aria-invalid={!!errors.title} />
-                                {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
-                            </div>
-                            <div className='grow basis-xs'>
-                                <Label htmlFor="slug">Slug</Label>
-                                <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} aria-invalid={!!errors.slug} />
-                                {errors.slug && <p className="text-xs text-destructive mt-1">{errors.slug}</p>}
-                            </div>
-                        </div>
-                        <div>
-                            <Label htmlFor="summary">Summary</Label>
-                            <Textarea id="summary" value={data.summary} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('summary', e.target.value)} rows={4} />
-                            {errors.summary && <p className="text-xs text-destructive mt-1">{errors.summary}</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button type="submit" className='w-fit' disabled={processing}>Save Changes</Button>
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => {
-                                    if (confirm('Delete this post? This cannot be undone.')) {
-                                        router.delete(`/posts/${post.id}`);
-                                    }
-                                }}
-                            >
-                                <Trash2 className="mr-1 h-4 w-4" /> Delete Post
-                            </Button>
-                        </div>
+            <form onSubmit={onSubmit} className='flex flex-wrap'>
+                <div className="px-4 py-6 bg-muted grow">
+                    <input id="title" className='text-4xl mb-4 px-1 lg:text-6xl font-semibold' value={data.title} onChange={(e) => setData('title', e.target.value)} aria-invalid={!!errors.title} />
+                    {errors.title && <p className="text-xs text-destructive my-1">{errors.title}</p>}
+                    {errors.content && <p className="text-xs text-destructive my-1">{errors.content}</p>}
+                    <TiptapEditor
+                        value={data.content}
+                        onChange={(json) => setData('content', json)}
+                    />
+                </div>
+                <div className="flex flex-col items-stretch border-l sticky top-0 basis-xs divide-y editor-sidebar">
+                    <div className="grow flex gap-4 p-4">
+                        <Button type="submit" className='w-fit' disabled={processing}>Save Changes</Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => {
+                                if (confirm('Delete this post? This cannot be undone.')) {
+                                    router.delete(`/posts/${post.id}`);
+                                }
+                            }}
+                        >
+                            <Trash2 className="mr-1 h-4 w-4" /> Delete Post
+                        </Button>
+                    </div>
+                    <div className='flex gap-2 flex-wrap'>
+                        <div className="grow basis-xs">
 
-                    </Card>
-                    <div className="space-y-4 basis-sm">
-                        <Card className="p-4 ">
-                            <div className="space-y-3">
-                                <Label>Cover</Label>
-                                <div
-                                    className="border rounded-md p-2 bg-muted/40 hover:bg-muted/60 transition-colors cursor-pointer"
-                                    onDrop={onCoverDrop}
-                                    onDragOver={onCoverDragOver}
-                                    onClick={() => document.getElementById('cover-input')?.click()}
-                                >
-                                    {coverPreview ? (
-                                        <img src={coverPreview} alt={post.title} className="w-full rounded border" />
-                                    ) : (
-                                        <div className="text-sm text-muted-foreground text-center py-8">
-                                            Drag & drop an image here, or click to select
-                                        </div>
-                                    )}
-                                </div>
-                                <Input id="cover-input" type="file" accept="image/*" className="hidden" onChange={(e) => onCoverChange(e.target.files?.[0] || null)} />
-                                {errors.cover && <p className="text-xs text-destructive mt-1">{errors.cover}</p>}
-                                <div className="flex items-center gap-2">
-                                    <Button type="button" variant="default" disabled={!coverFile || coverProcessing} onClick={submitCover}>Update</Button>
-                                    <Button type="button" variant="destructive" onClick={deleteCover} disabled={!coverPreview || coverProcessing}>
-                                        <Trash2 className="mr-1 h-4 w-4" /> Delete
-                                    </Button>
-                                </div>
+                            <Label>Status</Label>
+                            <Select value={String(data.status)} onValueChange={(v) => setData('status', Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {Object.entries(statuses).map(([key, label]) => (
+                                            <SelectItem key={key} value={String(key)}>{label}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grow basis-xs">
+                            <Label>Slug</Label>
+                            <div className='flex gap-2 items-center'>
+                                <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} aria-invalid={!!errors.slug} />
                             </div>
-                        </Card>
+                            {errors.slug && <p className="text-xs text-destructive mt-1">{errors.slug}</p>}
+                        </div>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                        <div className='grow basis-xs'>
+                            <Label>Type</Label>
+                            <Select value={String(data.type)} onValueChange={(v) => setData('type', Number(v))}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {Object.entries(types).map(([key, label]) => (
+                                            <SelectItem key={key} value={String(key)}>{label}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className='grow basis-xs'>
+                            <Label htmlFor="category">Category</Label>
+                            <Input id="category" value={data.category} onChange={(e) => setData('category', e.target.value)} aria-invalid={!!errors.category} />
+                            {errors.category && <p className="text-xs text-destructive mt-1">{errors.category}</p>}
+                        </div>
+                    </div>
+                    <div>
+                        <CoverUploader postId={post.id} title={post.title} initialPreview={post.cover_url ?? null} />
+                    </div>
+
+                    <div>
+                        <Label htmlFor="summary">Summary</Label>
+                        <Textarea id="summary" value={data.summary} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('summary', e.target.value)} rows={4} />
+                        {errors.summary && <p className="text-xs text-destructive mt-1">{errors.summary}</p>}
                     </div>
                 </div>
-                <Label htmlFor="content">Content</Label>
-                <Card className="!gap-0 !p-0">
-                    <div className='-m-px'>
-                        <TiptapEditor
-                            value={data.content}
-                            onChange={(json) => setData('content', json)}
-                            className='lg:min-h-full'
-                        />
-                        {errors.content && <p className="text-xs text-destructive mt-1">{errors.content}</p>}
-                    </div>
-                </Card>
             </form>
         </AppLayout>
     );

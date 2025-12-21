@@ -45,7 +45,8 @@ export interface User {
 
 export interface Post {
     id:number;
-    slug: string;
+    slug: string; // full path slug used for routing
+    slug_title?: string | null; // user-defined short slug
     title: string;
     summary: string;
     cover_url: string;

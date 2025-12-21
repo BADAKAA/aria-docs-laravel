@@ -18,13 +18,13 @@ return new class extends Migration
             $table->string('title');
             $table->string('category')->nullable();
             $table->string('summary', 512)->nullable();
+            $table->string('slug_title')->nullable();
             $table->string('slug')->unique();
             $table->tinyInteger('type')->default(0);
             $table->tinyInteger('status')->default(0);
             $table->unsignedBigInteger('position')->nullable();
             $table->string('cover_path')->nullable();
             $table->longText('content');
-            $table->longText('content_html')->nullable();
             $table->dateTime('published_at')->nullable();
             $table->timestamps();
         });

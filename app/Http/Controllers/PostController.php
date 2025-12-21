@@ -12,8 +12,8 @@ use Inertia\Inertia;
 
 class PostController extends Controller {
 
-    public function show() {
-        $post = Post::public()->firstOrFail();
+    public function show(int $id) {
+        $post = Post::public()->findOrFail($id);
         $route = (int) $post->type === PostType::BLOG->value
             ? route('blog.show', $post->slug)
             : route('docs.show', $post->slug);
@@ -29,7 +29,7 @@ class PostController extends Controller {
             ->whereAny(['title', 'summary', 'slug'], 'like', "%{$q}%")
             ->orderBy('published_at', 'desc')
             ->limit(10)
-            ->get(['id', 'title', 'summary', 'slug', 'type']);
+            ->get(['id', 'title', 'summary', 'slug_title', 'slug', 'type']);
 
         $data = $results->map(function ($p) {
             $type = (int) $p->type === PostType::BLOG->value ? 'blog' : 'docs';
@@ -46,7 +46,7 @@ class PostController extends Controller {
 
         return response()->json(['data' => $data]);
     }
-
+    
     public function edit(Post $post) {
         return Inertia::render('posts/edit', [
             'post' => $post->load('author'),
@@ -58,16 +58,16 @@ class PostController extends Controller {
     public function update(Request $request, Post $post) {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            // allow slash in docs slugs while keeping sane chars
-            'slug' => [
-                'required', 'string', 'max:255',
-                'regex:/^[A-Za-z0-9](?:[A-Za-z0-9\-\/]*[A-Za-z0-9])?$/',
-                Rule::unique('posts', 'slug')->ignore($post->id),
+            // slug is now just the short post name (nullable)
+            'slug_title' => [
+                'nullable', 'string', 'max:255',
+                // allow simple slugs like "my-post-name"; letters, numbers, dashes
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
             ],
+            // URL is computed from slug/title; don't accept direct field from the request
             'summary' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'category' => ['nullable', 'string', 'max:255'],
-            'content_html' => ['nullable', 'string'],
             // Optional BlockNote blocks payload; stored when schema has a JSON 'blocks' column
             'blocks' => ['nullable', 'array'],
             'type' => ['required', 'integer', Rule::in([PostType::DOC->value, PostType::BLOG->value])],
@@ -78,10 +78,10 @@ class PostController extends Controller {
 
         $data = [
             'title' => $validated['title'],
-            'slug' => $validated['slug'],
+            // Preserve user-defined slug only; keep null if not provided
+            'slug_title' => $validated['slug_title'] ?? null,
             'summary' => $validated['summary'] ?? null,
             'content' => $validated['content'] ?? null,
-            'content_html' => $validated['content_html'] ?? null,
             'category' => $validated['category'] ?? null,
             'type' => $validated['type'],
             'status' => $validated['status'],

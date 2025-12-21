@@ -29,10 +29,9 @@ export default function EditPost() {
 
     const { data, setData, post: submit, processing, errors, transform } = useForm<FormDataType>({
         title: post.title || '',
-        slug: post.slug || '',
+        slug_title: (post as any).slug_title || '',
         summary: post.summary || '',
         content: post.content || '',
-        content_html: (post as any).content_html || '',
         type: post.type as unknown as number,
         status: post.status as unknown as number,
         category: (post as any).category || '',
@@ -42,10 +41,9 @@ export default function EditPost() {
 
     type FormDataType = {
         title: string;
-        slug: string;
+        slug_title: string;
         summary: string;
         content: string;
-        content_html?: string;
         type: number;
         status: number;
         category: string;
@@ -137,11 +135,11 @@ export default function EditPost() {
                             </Select>
                         </div>
                         <div className="grow basis-xs">
-                            <Label>Slug</Label>
+                            <Label>Custom Slug Title</Label>
                             <div className='flex gap-2 items-center'>
-                                <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} aria-invalid={!!errors.slug} />
+                                <Input id="slug_title" value={data.slug_title} placeholder={slugify(data.title)} onChange={(e) => setData('slug_title', e.target.value)} aria-invalid={!!errors.slug_title} />
                             </div>
-                            {errors.slug && <p className="text-xs text-destructive mt-1">{errors.slug}</p>}
+                            {(errors as any).slug_title && <p className="text-xs text-destructive mt-1">{(errors as any).slug_title}</p>}
                         </div>
                     </div>
                     <div className="flex gap-2 flex-wrap">
@@ -179,4 +177,12 @@ export default function EditPost() {
             </form>
         </AppLayout>
     );
+}
+
+function slugify(input: string): string {
+    let s = (input || '').toLowerCase();
+    s = s.replace(/\s+/g, '-');
+    s = s.replace(/[^a-z0-9-]/g, '');
+    s = s.replace(/-+/g, '-');
+    return s.replace(/^-+|-+$/g, '');
 }

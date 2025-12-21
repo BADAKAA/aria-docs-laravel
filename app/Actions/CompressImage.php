@@ -75,8 +75,8 @@ class CompressImage {
             default => imagejpeg($dst_img, $output, $quality)
         };
 
-        if ($dst_img) imagedestroy($dst_img);
-        if ($src_img) imagedestroy($src_img);
+        if ($dst_img) $dst_img = null;
+        if ($src_img) $src_img = null;
 
         if (!$target_path && $file_path !== $output) unlink($file_path);
 

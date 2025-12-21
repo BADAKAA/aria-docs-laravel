@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
-use App\Services\ImageService;
+use App\Actions\CompressImage;
 use App\Enums\Role;
 use App\Models\Media;
 
@@ -102,7 +102,7 @@ class MediaController extends Controller
         @mkdir(dirname($absoluteTarget), 0775, true);
 
         try {
-            ImageService::compress($tmpPath, null, 80, 'webp', $absoluteTarget);
+            CompressImage::at($tmpPath, null, 80, 'webp', $absoluteTarget);
         } catch (\Exception $e) {
             return back()->withErrors(['file' => 'Failed to process image: '.$e->getMessage()]);
         }

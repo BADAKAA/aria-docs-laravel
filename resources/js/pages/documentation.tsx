@@ -21,7 +21,7 @@ export default function Documentation() {
     const blocks = JSON.parse((post as any)?.content) as Array<{ type: string; props?: any }> | undefined;
     const contentRef = useRef<HTMLDivElement | null>(null);
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
-    const index = (page.index || []) as Array<{ id:number; title:string; slug:string; category?:string|null; parent_id:number|null; position?:number }>;
+    const index = (page.index || []) as Array<{ id: number; title: string; slug: string; category?: string | null; parent_id: number | null; position?: number }>;
     const parents = post.slug.split('/').map(part => ({
         title: ucfirst(part.replaceAll('-', ' ')),
         href: '/docs/' + (post.slug?.split('/').slice(0, post.slug!.split('/').indexOf(part) + 1).join('/') ?? ''),
@@ -40,25 +40,19 @@ export default function Documentation() {
 
     const tocItems = extractTocFromHtml(post.content_html || '');
 
-    useEffect(() => {
-        if (!Array.isArray(blocks) || blocks.length === 0) {
-            setSanitizedHTML(contentRef.current, post.content_html || '');
-        }
-    }, [post?.content_html, blocks]);
-
     // Build ordered DFS list from index (position, then title)
-    const byParent = new Map<number|null, typeof index>();
+    const byParent = new Map<number | null, typeof index>();
     for (const it of index) {
         const list = byParent.get(it.parent_id) || [];
         list.push(it);
         byParent.set(it.parent_id, list);
     }
     for (const [k, list] of byParent) {
-        list.sort((a,b) => (a.position ?? 0) - (b.position ?? 0) || a.title.localeCompare(b.title));
+        list.sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.title.localeCompare(b.title));
         byParent.set(k, list);
     }
     const order: typeof index = [];
-    const walk = (pid: number|null) => {
+    const walk = (pid: number | null) => {
         const children = byParent.get(pid) || [];
         for (const c of children) {
             order.push(c);
@@ -69,8 +63,6 @@ export default function Documentation() {
     const currentIdx = order.findIndex(it => it.slug === post.slug);
     const prev = currentIdx > 0 ? { title: order[currentIdx - 1].title, href: `/${order[currentIdx - 1].slug}` } : undefined;
     const next = currentIdx >= 0 && currentIdx < order.length - 1 ? { title: order[currentIdx + 1].title, href: `/${order[currentIdx + 1].slug}` } : undefined;
-    console.log(blocks);
-    
 
     return (
         <GuestLayout>
@@ -87,7 +79,7 @@ export default function Documentation() {
                                     {isLoggedIn ? (
                                         <Link href={`/posts/${post.id}/edit`} className="flex  gap-2 items-center no-underline hover:underline decoration-dotted">
                                             {post.title}
-                                            <Edit className='size-[1em]'/>
+                                            <Edit className='size-[1em]' />
                                         </Link>
                                     ) : (
                                         post.title
@@ -99,8 +91,6 @@ export default function Documentation() {
                                 <div>
                                     {Array.isArray(blocks) && blocks.length > 0 ? (
                                         <ReadOnlyBlockNote blocks={blocks} />
-                                    ) : post.content_html ? (
-                                        <div ref={contentRef} className="prose dark:prose-invert" />
                                     ) : (
                                         <p className="mt-6 text-muted-foreground">No content.</p>
                                     )}

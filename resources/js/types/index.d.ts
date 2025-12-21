@@ -50,6 +50,7 @@ export interface Post {
     title: string;
     summary: string;
     cover_url: string;
+    cover_path?: string | null;
     author: User;
     type: number;
     status: number;

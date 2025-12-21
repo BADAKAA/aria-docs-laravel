@@ -6,10 +6,12 @@ import { buttonVariants } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Typography } from '@/components/typography';
+import ReadOnlyBlockNote from '@/blocks/BlockRenderer';
 
 export default function BlogShow() {
     const page = usePage().props as any;
     const post = page.post as Post;
+    const blocks = JSON.parse((post as any)?.content) as Array<{ type: string; props?: any }> | undefined;
     const isLoggedIn = Boolean(page?.auth?.user || page?.user);
     return (
         <GuestLayout>
@@ -33,7 +35,7 @@ export default function BlogShow() {
                         {isLoggedIn ? (
                             <a href={`/posts/${post.id}/edit`} className="flex gap-2 items-center hover:underline decoration-dotted">
                                 {post.title}
-                                <Edit className='size-[1em]'/>
+                                <Edit className='size-[1em]' />
                             </a>
                         ) : (
                             post.title
@@ -73,13 +75,13 @@ export default function BlogShow() {
 
                 {/* Content */}
                 <article className="prose dark:prose-invert max-w-none markdown">
-                    <Typography>
-                        {post.content_html ? (
-                            <div dangerouslySetInnerHTML={{ __html: post.content_html }} />
+                    <div>
+                        {Array.isArray(blocks) && blocks.length > 0 ? (
+                            <ReadOnlyBlockNote blocks={blocks} />
                         ) : (
                             <p className="mt-6 text-muted-foreground">No content.</p>
                         )}
-                    </Typography>
+                    </div>
                 </article>
                 <div className="h-4"></div>
             </div>

@@ -3,14 +3,14 @@ import { useForm } from '@inertiajs/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Post } from '@/types';
 
 type Props = {
-    postId: number | string;
-    title: string;
+    post: Post;
     initialPreview?: string | null;
 };
 
-export default function CoverUploader({ postId, title, initialPreview = null }: Props) {
+export default function CoverUploader({ post:_post, initialPreview = null }: Props) {
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(initialPreview);
 
@@ -52,12 +52,12 @@ export default function CoverUploader({ postId, title, initialPreview = null }: 
 
     const submitCover = () => {
         if (!coverFile) return;
-        post(`/posts/${postId}/cover`, { forceFormData: true, onFinish: () => setCoverFile(null) } as any);
+        post(`/posts/${_post.id}/cover`, { forceFormData: true, onFinish: () => setCoverFile(null) } as any);
     };
 
     const deleteCover = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        destroy(`/posts/${postId}/cover`, { onSuccess: () => setCoverPreview(null) } as any);
+        destroy(`/posts/${_post.id}/cover`, { onSuccess: () => setCoverPreview(null) } as any);
     };
 
     return (
@@ -71,9 +71,9 @@ export default function CoverUploader({ postId, title, initialPreview = null }: 
                     onClick={() => document.getElementById('cover-input')?.click()}
                 >
                     {coverPreview ? (
-                        <img src={coverPreview} alt={title} className="w-full rounded border" />
+                        <img src={coverPreview} alt={_post.title} className="w-full rounded border" />
                     ) : (
-                        <div className="text-sm text-muted-foreground text-center py-8">
+                        <div className="text-sm text-muted-foreground text-center py-8 h-32">
                             Drag & drop an image here, or click to select
                         </div>
                     )}
@@ -90,7 +90,7 @@ export default function CoverUploader({ postId, title, initialPreview = null }: 
                     <Button type="button" variant="secondary" className='grow' disabled={!coverFile || processing} onClick={submitCover}>
                         Save
                     </Button>
-                    <Button type="button" variant="secondary" className='grow' onClick={deleteCover} disabled={!coverPreview || processing}>
+                    <Button type="button" variant="secondary" className='grow' onClick={deleteCover} disabled={!coverPreview || processing || !_post.cover_path}>
                         Delete
                     </Button>
                 </div>

@@ -102,8 +102,8 @@ export default function EditPost() {
                         />
                     </div>
                 </div>
-                <div className="flex flex-col items-stretch border-l sticky top-0 basis-xs divide-y editor-sidebar">
-                    <div className="grow flex gap-4 p-4">
+                <div className="flex flex-col items-start border-l sticky top-0 basis-xs divide-y editor-sidebar">
+                    <div className="flex gap-4 p-4">
                         <Button type="submit" className='w-fit' disabled={processing}>Save Changes</Button>
                         <Button
                             type="button"
@@ -119,7 +119,6 @@ export default function EditPost() {
                     </div>
                     <div className='flex gap-2 flex-wrap'>
                         <div className="grow basis-xs">
-
                             <Label>Status</Label>
                             <Select value={String(data.status)} onValueChange={(v) => setData('status', Number(v))}>
                                 <SelectTrigger>
@@ -165,10 +164,9 @@ export default function EditPost() {
                         </div>
                     </div>
                     <div>
-                        <CoverUploader postId={post.id} title={post.title} initialPreview={post.cover_url ?? null} />
+                        <CoverUploader post={post} initialPreview={post.cover_url ?? null} />
                     </div>
-
-                    <div>
+                    <div className='w-full'>
                         <Label htmlFor="summary">Summary</Label>
                         <Textarea id="summary" value={data.summary} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('summary', e.target.value)} rows={4} />
                         {errors.summary && <p className="text-xs text-destructive mt-1">{errors.summary}</p>}

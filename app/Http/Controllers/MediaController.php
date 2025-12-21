@@ -145,6 +145,39 @@ class MediaController extends Controller
             ->with('uploaded', $payload);
     }
 
+    public function rename(Request $request, string $id) {
+        $user = $request->user();
+        $uid = (int) $user->id;
+
+        $request->validate([
+            'name' => 'required|string|min:1|max:255',
+        ]);
+
+        $media = Media::where('id', $id)->where('user_id', $uid)->first();
+        if (!$media) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['message' => 'Image not found.'], 404);
+            }
+            return back()->withErrors(['id' => 'Image not found.']);
+        }
+
+        // Update display name only; keep id/path (slug) unchanged
+        $media->original_name = trim((string) $request->input('name'));
+        $media->save();
+
+        $payload = [
+            'id' => $media->id,
+            'url' => asset('storage/'.$media->path),
+            'name' => $media->original_name,
+        ];
+
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json($payload, 200);
+        }
+
+        return redirect()->route('media.library')->with('success', 'Image renamed')->with('updated', $payload);
+    }
+
     public function destroy(Request $request, string $id) {
         $user = $request->user();
         $uid = (int) $user->id;

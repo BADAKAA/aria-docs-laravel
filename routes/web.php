@@ -32,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/media', [MediaController::class, 'index'])->name('media.library');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->name('media.destroy');
+    Route::patch('/media/{id}', [MediaController::class, 'rename'])->name('media.rename');
 
     // Docs ordering
     Route::get('order-docs', [\App\Http\Controllers\DocsController::class, 'order'])->name('docs.order');

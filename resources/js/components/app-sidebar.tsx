@@ -13,9 +13,10 @@ import {
 import { dashboard, home } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ListTree } from 'lucide-react';
+import { BookOpen, Folder, Images, LayoutGrid, ListTree } from 'lucide-react';
 import AppLogo from './app-logo';
 import { order } from '@/routes/docs';
+import { library } from '@/routes/media';
 
 const mainNavItems: NavItem[] = [
     {
@@ -27,6 +28,11 @@ const mainNavItems: NavItem[] = [
         title: 'Order Docs',
         href: order(),
         icon: ListTree,
+    },
+    {
+        title: 'Media Library',
+        href: library(),
+        icon: Images,
     },
 ];
 

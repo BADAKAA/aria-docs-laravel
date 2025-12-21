@@ -89,3 +89,29 @@ export function ucfirst(str: string): string {
   });
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export async function copyToClipboard(copyText: string) {
+  const hasClipboard = typeof navigator !== 'undefined' && (navigator as any).clipboard && typeof (navigator as any).clipboard.writeText === 'function';
+  if (hasClipboard) {
+    await (navigator as any).clipboard.writeText(copyText);
+  } else if (typeof document !== 'undefined') {
+    const ta = document.createElement('textarea');
+    ta.value = copyText;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      const ok = document.execCommand('copy');
+      if (!ok) throw new Error('Copy command not supported');
+    } finally {
+      document.body.removeChild(ta);
+    }
+  } else {
+    throw new Error('Clipboard unavailable');
+  }
+}

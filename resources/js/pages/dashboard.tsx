@@ -39,16 +39,16 @@ export default function Dashboard() {
     const statusIcon = (s: number) => {
         switch (s) {
             case 1: return <Globe className="size-3 text-green-600 dark:text-green-500" size={18} aria-label="Public" />;
-            case 2: return <Lock className="size-3 text-yellow-600 dark:text-yellow-500" size={18} aria-label="Private"/>;
-            default: return <StickyNote className="size-3 text-muted-foreground" size={18} aria-label="Draft"/>;
+            case 2: return <Lock className="size-3 text-yellow-600 dark:text-yellow-500" size={18} aria-label="Private" />;
+            default: return <StickyNote className="size-3 text-muted-foreground" size={18} aria-label="Draft" />;
         }
     };
 
     const typeIcon = (t: number) => {
         switch (t) {
-            case 0: return <FileText className="text-blue-600 dark:text-blue-400" size={18} aria-label="Documentation"/>;
-            case 1: return <FileText className="text-purple-600 dark:text-purple-400" size={18} aria-label="Blog"/>;
-            default: return <FileText size={18}/>;
+            case 0: return <FileText className="text-blue-600 dark:text-blue-400" size={18} aria-label="Documentation" />;
+            case 1: return <FileText className="text-purple-600 dark:text-purple-400" size={18} aria-label="Blog" />;
+            default: return <FileText size={18} />;
         }
     };
 
@@ -56,97 +56,95 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
-            <div className="p-4">
-                {/* Filters */}
-                <div className="flex flex-wrap gap-3 items-center mb-4">
-                    <Input
-                        placeholder="Search by title, summary, slug…"
-                        className="w-full sm:w-72"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                    />
-                    <Select value={type} onValueChange={(v) => setType(v)}>
-                        <SelectTrigger className="w-[180px]"><SelectValue placeholder="All types" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="all">All types</SelectItem>
-                                {Object.entries(types).map(([key, label]) => (
-                                    <SelectItem key={key} value={String(key)}>{label}</SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                    <Select value={status} onValueChange={(v) => setStatus(v)}>
-                        <SelectTrigger className="w-[180px]"><SelectValue placeholder="Any status" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="all">Any status</SelectItem>
-                                {Object.entries(statuses).map(([key, label]) => (
-                                    <SelectItem key={key} value={String(key)}>{label}</SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                    <div className="ml-auto flex items-center gap-2">
-                        <button
-                            className={buttonVariants({ variant: registrationClosed ? 'secondary' : 'default' })}
-                            title={registrationClosed ? 'Open registration' : 'Close registration'}
-                            onClick={() => router.post('/admin/toggle-registration')}
-                        >
-                            {registrationClosed ? <UserPlus className="mr-2 h-4 w-4"/> : <UserX className="mr-2 h-4 w-4"/>}
-                            {registrationClosed ? 'Open registration' : 'Close registration'}
-                        </button>
-                    </div>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-center mb-4">
+                <Input
+                    placeholder="Search by title, summary, slug…"
+                    className="w-full sm:w-72"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                />
+                <Select value={type} onValueChange={(v) => setType(v)}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="All types" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="all">All types</SelectItem>
+                            {Object.entries(types).map(([key, label]) => (
+                                <SelectItem key={key} value={String(key)}>{label}</SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <Select value={status} onValueChange={(v) => setStatus(v)}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Any status" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="all">Any status</SelectItem>
+                            {Object.entries(statuses).map(([key, label]) => (
+                                <SelectItem key={key} value={String(key)}>{label}</SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <div className="ml-auto flex items-center gap-2">
+                    <button
+                        className={buttonVariants({ variant: registrationClosed ? 'secondary' : 'default' })}
+                        title={registrationClosed ? 'Open registration' : 'Close registration'}
+                        onClick={() => router.post('/admin/toggle-registration')}
+                    >
+                        {registrationClosed ? <UserPlus className="mr-2 h-4 w-4" /> : <UserX className="mr-2 h-4 w-4" />}
+                        {registrationClosed ? 'Open registration' : 'Close registration'}
+                    </button>
                 </div>
+            </div>
 
-                {/* List */}
-                <div className="border rounded-md divide-y">
-                    {posts.data.length === 0 ? (
-                        <div className="p-6 text-sm text-muted-foreground">No posts found.</div>
-                    ) : posts.data.map((p) => (
-                        <div
-                            key={p.id}
-                            className="p-3 flex items-center gap-3 cursor-pointer hover:bg-muted/50"
-                            role="link"
-                            aria-label={`Edit ${p.title}`}
-                            tabIndex={0}
-                            onClick={() => router.visit(`/posts/${p.id}/edit`)}
-                            onKeyDown={(e) => { if (e.key === 'Enter') router.visit(`/posts/${p.id}/edit`); }}
-                        >
-                            <div className="shrink-0">{typeIcon(p.type)}</div>
-                            <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">
-                                    {p.title}
-                                    <div className="inline-flex ms-2 gap-1.5 text-xs items-center rounded-full bg-muted px-2 py-1 font-medium w-min text-foreground/75">{statusIcon(p.status)} {statuses[p.status]}</div>
-                                    </div>
-                                <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
+            {/* List */}
+            <div className="border rounded-md divide-y">
+                {posts.data.length === 0 ? (
+                    <div className="p-6 text-sm text-muted-foreground">No posts found.</div>
+                ) : posts.data.map((p) => (
+                    <div
+                        key={p.id}
+                        className="p-3 flex items-center gap-3 cursor-pointer hover:bg-muted/50"
+                        role="link"
+                        aria-label={`Edit ${p.title}`}
+                        tabIndex={0}
+                        onClick={() => router.visit(`/posts/${p.id}/edit`)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') router.visit(`/posts/${p.id}/edit`); }}
+                    >
+                        <div className="shrink-0">{typeIcon(p.type)}</div>
+                        <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">
+                                {p.title}
+                                <div className="inline-flex ms-2 gap-1.5 text-xs items-center rounded-full bg-muted px-2 py-1 font-medium w-min text-foreground/75">{statusIcon(p.status)} {statuses[p.status]}</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <a className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 bg-neutral-500/5 hover:bg-neutral-500/7' })} href={p.type === 1 ? `/blog/${p.slug}` : `/docs/${p.slug}`} target="_blank" rel="noopener" title="View" onClick={(e) => e.stopPropagation()}>
-                                    <Eye size={16} />
-                                </a>
-                                <button
-                                    className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 text-destructive hover:text-destructive bg-red-500/5 hover:bg-red-500/7' })}
-                                    title="Delete"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm(`Delete \"${p.title}\"? This cannot be undone.`)) {
-                                            router.delete(`/posts/${p.id}`);
-                                        }
-                                    }}
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
+                            <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
                         </div>
-                    ))}
-                </div>
+                        <div className="flex items-center gap-2">
+                            <a className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 bg-neutral-500/5 hover:bg-neutral-500/7' })} href={p.type === 1 ? `/blog/${p.slug}` : `/docs/${p.slug}`} target="_blank" rel="noopener" title="View" onClick={(e) => e.stopPropagation()}>
+                                <Eye size={16} />
+                            </a>
+                            <button
+                                className={buttonVariants({ variant: 'ghost', className: 'h-8 px-2 text-destructive hover:text-destructive bg-red-500/5 hover:bg-red-500/7' })}
+                                title="Delete"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`Delete \"${p.title}\"? This cannot be undone.`)) {
+                                        router.delete(`/posts/${p.id}`);
+                                    }
+                                }}
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
-                {/* Pagination */}
-                <div className="flex items-center mt-4">
-                    <div className="text-sm text-muted-foreground mr-auto">Total: {posts.total}</div>
-                    <Pagination data={posts} align="right" />
-                </div>
+            {/* Pagination */}
+            <div className="flex items-center mt-4">
+                <div className="text-sm text-muted-foreground mr-auto">Total: {posts.total}</div>
+                <Pagination data={posts} align="right" />
             </div>
         </AppLayout>
     );

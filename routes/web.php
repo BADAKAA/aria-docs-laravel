@@ -3,6 +3,7 @@
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DocsController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MediaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -27,6 +28,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cover image endpoints
     Route::post('posts/{post}/cover', [PostController::class, 'updateCover'])->name('posts.cover.update');
     Route::delete('posts/{post}/cover', [PostController::class, 'deleteCover'])->name('posts.cover.delete');
+    
+    Route::get('/media', [MediaController::class, 'index'])->name('media.library');
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::delete('/media/{id}', [MediaController::class, 'destroy'])->name('media.destroy');
+
     // Docs ordering
     Route::get('order-docs', [\App\Http\Controllers\DocsController::class, 'order'])->name('docs.order');
     Route::post('order-docs', [\App\Http\Controllers\DocsController::class, 'updateOrder'])->name('docs.order.update');

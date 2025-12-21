@@ -312,7 +312,7 @@ export default function DocsOrderPage() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Docs Order" />
-            <div className="p-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-lg font-semibold">Order Documentation</h1>
                     <Button onClick={onSave}>Save Order</Button>

@@ -130,6 +130,6 @@ export default function TiptapEditor({ value, onChange, className }: TiptapEdito
   }, editor);
 
   return (
-    <BlockNoteView editor={editor} className="min-h-[300px] mx-auto max-w-4xl" style={{ fontFamily: 'inherit' }} />
+    <BlockNoteView editor={editor} className="min-h-[300px]" style={{ fontFamily: 'inherit' }} />
   );
 }

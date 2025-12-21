@@ -11,6 +11,15 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PostController extends Controller {
+
+    public function show() {
+        $post = Post::public()->firstOrFail();
+        $route = (int) $post->type === PostType::BLOG->value
+            ? route('blog.show', $post->slug)
+            : route('docs.show', $post->slug);
+        return redirect($route);
+
+    }
     public function search(Request $request) {
         $q = trim((string) $request->query('q', ''));
         if ($q === '') {

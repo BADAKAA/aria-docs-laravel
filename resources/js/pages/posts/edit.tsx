@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import TiptapEditor from '@/components/markdown/tiptap-editor';
-import { Eye, Save, Trash2 } from 'lucide-react';
+import { ExternalLink, Eye, Save, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import CoverUploader from './partials/CoverUploader';
+import { show } from '@/routes/posts';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -63,10 +64,23 @@ export default function EditPost() {
         } as any);
     };
 
-    // Sync preview from server after Inertia navigation/redirect
+    // Keyboard shortcut: Ctrl/Cmd + S to save changes
     useEffect(() => {
-        // No-op: `CoverUploader` handles its own preview sync via props
-    }, [post.cover_url]);
+        const onKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                if (processing) return;
+                // Mirror onSubmit: method spoofing + multipart
+                transform((form) => ({ ...(form as any), _method: 'put' }));
+                submit(`/posts/${post.id}` as string, {
+                    forceFormData: true,
+                    onSuccess: () => { },
+                } as any);
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [post.id, processing, submit, transform]);
 
     // Live preview is not needed; Tiptap shows formatting inline
 
@@ -75,13 +89,20 @@ export default function EditPost() {
             <Head title="Edit Post" />
             <form onSubmit={onSubmit} className='flex flex-wrap'>
                 <div className="px-4 py-6 bg-muted grow">
-                    <input id="title" className='text-4xl mb-4 px-1 lg:text-6xl font-semibold' value={data.title} onChange={(e) => setData('title', e.target.value)} aria-invalid={!!errors.title} />
-                    {errors.title && <p className="text-xs text-destructive my-1">{errors.title}</p>}
-                    {errors.content && <p className="text-xs text-destructive my-1">{errors.content}</p>}
-                    <TiptapEditor
-                        value={data.content}
-                        onChange={(json) => setData('content', json)}
-                    />
+                    <div className='mx-auto max-w-4xl'>
+                        <div className="flex gap-4 items-center justify-center mb-4">
+                            <input id="title" className='text-4xl lg:text-6xl tracking-tight w-full rounded-md' value={data.title} onChange={(e) => setData('title', e.target.value)} aria-invalid={!!errors.title} placeholder='New Post'/>
+                            <a href={show(post.id).url} target='_blank'>
+                                <ExternalLink className='size-6 lg:size-8' />
+                            </a>
+                        </div>
+                        {errors.title && <p className="text-xs text-destructive my-1">{errors.title}</p>}
+                        {errors.content && <p className="text-xs text-destructive my-1">{errors.content}</p>}
+                        <TiptapEditor
+                            value={data.content}
+                            onChange={(json) => setData('content', json)}
+                        />
+                    </div>
                 </div>
                 <div className="flex flex-col items-stretch border-l sticky top-0 basis-xs divide-y editor-sidebar">
                     <div className="grow flex gap-4 p-4">

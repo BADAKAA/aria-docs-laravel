@@ -13,6 +13,12 @@ use Illuminate\Support\Str;
 class DocumentationSeeder extends Seeder
 {
     /**
+     * Cache of converted BlockNote JSON by file path.
+     * @var array<string,string>
+     */
+    private array $blocksCache = [];
+
+    /**
      * Seed docs from the Next project's contents/docs directory.
      */
     public function run(): void
@@ -34,16 +40,26 @@ class DocumentationSeeder extends Seeder
             ]);
         }
 
+        // Precompute blocks for all markdown pages in a single Node process
+        $allFiles = $this->listIndexMarkdownFiles($docsRoot);
+        $fileBodies = [];
+        foreach ($allFiles as $fp) {
+            $raw = File::get($fp);
+            [, $mdBody] = $this->splitFrontmatter($raw);
+            $fileBodies[$fp] = $mdBody;
+        }
+        $this->blocksCache = $this->convertMarkdownBatch($fileBodies) ?? [];
+
         $this->seedDirectory($docsRoot, $defaultAuthor->id, $docsRoot);
     }
 
     private function seedDirectory(string $dir, int $authorId, string $root, string $category = 'General', ?int $parentId = null): void
     {
-        // Create/update the page for this directory if index.mdx exists, once.
-        $indexPath = $dir.DIRECTORY_SEPARATOR.'index.mdx';
+        // Create/update the page for this directory if index.md exists, once.
+        $indexPath = $dir.DIRECTORY_SEPARATOR.'index.md';
         $currentParentId = $parentId;
         if (is_file($indexPath)) {
-            $currentParentId = $this->createOrUpdateFromMdx($indexPath, $authorId, $root, $category, $parentId);
+            $currentParentId = $this->createOrUpdateFromMarkdown($indexPath, $authorId, $root, $category, $parentId);
         }
 
         // Recurse into subdirectories, passing the current directory's id as parent
@@ -60,17 +76,18 @@ class DocumentationSeeder extends Seeder
      * Parse MDX frontmatter and content; authors are ignored.
      * Returns the Post id.
      */
-    private function createOrUpdateFromMdx(string $filePath, int $authorId, string $root, string $category, ?int $parentId = null): int
+    private function createOrUpdateFromMarkdown(string $filePath, int $authorId, string $root, string $category, ?int $parentId = null): int
     {
         $slug = Str::of($filePath)
             ->after($root.DIRECTORY_SEPARATOR)
             ->replace(DIRECTORY_SEPARATOR, '/')
-            ->replace('/index.mdx', '')
-            ->replace('.mdx', '')
+            ->replace('/index.md', '')
+            ->replace('.md', '')
             ->lower()
             ->toString();
         $raw = File::get($filePath);
-        [$frontmatter, $content] = $this->splitFrontmatter($raw);
+        [$frontmatter, $mdBody] = $this->splitFrontmatter($raw);
+        $content = $this->blocksCache[$filePath] ?? $mdBody;
 
         $title = $frontmatter['title'] ?? $this->titleFromPath($filePath, $root);
         $summary = $frontmatter['description'] ?? null;
@@ -140,8 +157,82 @@ class DocumentationSeeder extends Seeder
     private function titleFromPath(string $path, string $root): string
     {
         $relative = trim(str_replace(['\\', $root], ['/', ''], $path), '/');
-        $dir = Str::beforeLast($relative, '/index.mdx');
+        $dir = Str::beforeLast($relative, '/index.md');
         $last = Str::afterLast($dir, '/');
         return Str::title(str_replace(['-', '_'], ' ', $last));
+    }
+
+    /**
+     * Convert a Markdown file to ProseMirror-style JSON using a Node script.
+     * Returns JSON string on success, or null on failure.
+     */
+    private function convertMarkdownToJson(string $filePath): ?string
+    {
+        try {
+            $script = base_path('scripts/md-to-prosemirror.js');
+            if (!is_file($script)) return null;
+            $cmd = 'node ' . escapeshellarg($script) . ' ' . escapeshellarg($filePath);
+            // shell_exec returns null on failure
+            $out = @shell_exec($cmd);
+            if (!is_string($out)) return null;
+            $json = trim($out);
+            // Basic sanity check: must start with '{' and contain "type":"doc"
+            if ($json === '') return null;
+            return $json;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Recursively list all index.md files under a directory.
+     * @return array<int,string>
+     */
+    private function listIndexMarkdownFiles(string $dir): array
+    {
+        $files = [];
+        foreach (scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..') continue;
+            $full = $dir.DIRECTORY_SEPARATOR.$entry;
+            if (is_dir($full)) {
+                $files = array_merge($files, $this->listIndexMarkdownFiles($full));
+            } elseif (is_file($full) && Str::endsWith($full, DIRECTORY_SEPARATOR.'index.md')) {
+                $files[] = $full;
+            } elseif (is_file($full) && Str::endsWith($full, 'index.md')) {
+                $files[] = $full;
+            }
+        }
+        return $files;
+    }
+
+    /**
+     * Batch convert multiple markdown bodies to BlockNote blocks via Node script.
+     * @param array<string,string> $fileBodies Map of filePath => markdownBody
+     * @return array<string,string>|null Map of filePath => blocks JSON string
+     */
+    private function convertMarkdownBatch(array $fileBodies): ?array
+    {
+        if (empty($fileBodies)) return [];
+        try {
+            $script = base_path('scripts/md-to-blocks-batch.js');
+            if (!is_file($script)) return null;
+            $tmp = tempnam(sys_get_temp_dir(), 'mdbatch_');
+            if ($tmp === false) return null;
+            File::put($tmp, json_encode($fileBodies, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            $cmd = 'node ' . escapeshellarg($script) . ' ' . escapeshellarg($tmp);
+            $out = @shell_exec($cmd);
+            @unlink($tmp);
+            if (!is_string($out)) return null;
+            $map = json_decode($out, true);
+            if (!is_array($map)) return null;
+            // Ensure values are strings
+            $result = [];
+            foreach ($map as $k => $v) {
+                $result[$k] = is_string($v) ? $v : json_encode($v);
+            }
+            return $result;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }
